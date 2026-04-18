@@ -22,29 +22,20 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/react/18.3.1/umd/react.production.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.3.1/umd/react-dom.production.min.js"></script>
 <script>
-// Minimal lucide-react shim
 (function(){
   const h = React.createElement;
   function icon(paths, vb){
     vb = vb || "0 0 24 24";
     return function(props){
       const {size=24, color="currentColor", ...rest} = props||{};
-      return h("svg",{
-        xmlns:"http://www.w3.org/2000/svg", width:size, height:size,
-        viewBox:vb, fill:"none", stroke:color,
-        strokeWidth:2, strokeLinecap:"round", strokeLinejoin:"round", ...rest
-      }, ...paths.map(function(d,i){ return h("path",{key:i,d:d}); }));
+      return h("svg",{xmlns:"http://www.w3.org/2000/svg",width:size,height:size,viewBox:vb,fill:"none",stroke:color,strokeWidth:2,strokeLinecap:"round",strokeLinejoin:"round",...rest},...paths.map(function(d,i){return h("path",{key:i,d:d});}));
     };
   }
   function iconL(lines, vb){
     vb = vb || "0 0 24 24";
     return function(props){
       const {size=24, color="currentColor", ...rest} = props||{};
-      return h("svg",{
-        xmlns:"http://www.w3.org/2000/svg", width:size, height:size,
-        viewBox:vb, fill:"none", stroke:color,
-        strokeWidth:2, strokeLinecap:"round", strokeLinejoin:"round", ...rest
-      }, ...lines);
+      return h("svg",{xmlns:"http://www.w3.org/2000/svg",width:size,height:size,viewBox:vb,fill:"none",stroke:color,strokeWidth:2,strokeLinecap:"round",strokeLinejoin:"round",...rest},...lines);
     };
   }
   window.lucideReact = {
@@ -956,6 +947,13 @@ function App() {
   useEffect(() => saveJSON(STORAGE_KEYS.tableSize, tableSize), [tableSize]);
   useEffect(() => saveJSON(STORAGE_KEYS.players, playerDB), [playerDB]);
   useEffect(() => saveJSON(STORAGE_KEYS.seats, seats), [seats]);
+
+  // Rebuild hand positions when seats change (swap, status change) — only if no hand in progress
+  useEffect(() => {
+    if (!hand || hand.events.length > 0) return;
+    const layout = computeLayout(seats, btnSeatIdx, options);
+    setHand(buildInitialHand(seats, layout, options));
+  }, [seats]);
   useEffect(() => saveJSON(STORAGE_KEYS.btnSeatIdx, btnSeatIdx), [btnSeatIdx]);
   useEffect(() => saveJSON(STORAGE_KEYS.options, options), [options]);
 
@@ -1212,18 +1210,18 @@ function App() {
     else if (btnSeatIdx === target) setBtnSeatIdx(seatIdx);
   };
 
-  // Drag & drop: swap ONLY the playerId between two seats.
-  // The physical seat (status, isHero, position via BTN) stays put.
-  // Never swaps Hero's identity. BTN is not affected.
+  // Swap: exchange playerId AND status between two seats.
+  // Hero is locked. Positions are recalculated by the seats useEffect.
   const moveSeat = (from, to) => {
     if (from === to) return;
     setSeats((prev) => {
       if (!prev[from] || !prev[to]) return prev;
-      if (prev[from].isHero || prev[to].isHero) return prev; // Hero locked
+      if (prev[from].isHero || prev[to].isHero) return prev;
       const next = [...prev];
       const tmpId = next[from].playerId;
-      next[from] = { ...next[from], playerId: next[to].playerId };
-      next[to] = { ...next[to], playerId: tmpId };
+      const tmpStatus = next[from].status;
+      next[from] = { ...next[from], playerId: next[to].playerId, status: next[to].status || "active" };
+      next[to] = { ...next[to], playerId: tmpId, status: tmpStatus || "active" };
       return next;
     });
   };
@@ -1530,7 +1528,7 @@ function Header({ tableSize, setTableSize, onResetTable, onSettings, onReorder, 
 
 function HandControls({ onUndo, canUndo, onResetHand, straddle, mississippi, onToggleStraddle, onToggleMississippi, handStarted }) {
   return (
-    React.createElement("div", {"className": "hand-controls"}, React.createElement("div", {"className": "hc-toggles"}, React.createElement("button", {"className": `hc-tog ${straddle && !mississippi ? "on" : ""}`, "onClick": onToggleStraddle, "disabled": handStarted, "title": "Straddle (UTG)"}, "STR"), React.createElement("button", {"className": `hc-tog ${mississippi ? "on" : ""}`, "onClick": onToggleMississippi, "disabled": handStarted, "title": "Mississippi (BU)"}, "MSP")), React.createElement("div", {"className": "hc-actions"}, React.createElement("button", {"className": "hc-btn", "onClick": onUndo, "disabled": !canUndo, "title": "Annuler dernière action"}, React.createElement(Undo2, {"size": 12}), "UNDO"), React.createElement("button", {"className": "hc-btn", "onClick": onResetHand, "title": "Réinitialiser la main en cours"}, React.createElement(RotateCcw, {"size": 12}), "RESET")))
+    React.createElement("div", {"className": "hand-controls"}, React.createElement("div", {"className": "hc-toggles"}, React.createElement("button", {"className": `hc-tog ${straddle && !mississippi ? "on" : ""}`, "onClick": onToggleStraddle, "disabled": handStarted, "title": "Straddle (UTG)"}, "STR"), React.createElement("button", {"className": `hc-tog ${mississippi ? "on" : ""}`, "onClick": onToggleMississippi, "disabled": handStarted, "title": "Mississippi (BU)"}, "MSP")), React.createElement("div", {"className": "hc-actions"}, React.createElement("button", {"className": "hc-btn", "onClick": onUndo, "disabled": !canUndo, "title": "Annuler dernière action"}, React.createElement(Undo2, {"size": 12}), "UNDO"), React.createElement("button", {"className": "hc-btn", "onClick": onResetHand, "disabled": !handStarted, "title": "Réinitialiser la main en cours"}, React.createElement(RotateCcw, {"size": 12}), "RESET")))
   );
 }
 
@@ -1783,7 +1781,7 @@ function StatsTable({ seats, getPlayerForSeat, view, setView, onResetSession }) 
   };
 
   return (
-    React.createElement("section", {"className": "stats"}, React.createElement("div", {"className": "stats-head"}, React.createElement("h2", null, "&gt; STATS"), React.createElement("div", {"className": "stats-toggle"}, React.createElement("button", {"className": `tog ${view === "session" ? "on" : ""}`, "onClick": () => setView("session")}, "SESSION"), React.createElement("button", {"className": `tog ${view === "global" ? "on" : ""}`, "onClick": () => setView("global")}, "GLOBAL"), React.createElement("button", {"className": `tog ${fullTable ? "on" : ""}`, "onClick": () => setFullTable((f) => !f)}, "FULL"))), React.createElement("div", {"className": "stats-scroll"}, React.createElement("div", {"className": "stats-grid", "style": { gridTemplateColumns: gridCols }}, React.createElement("div", {"className": "sh"}, "PLAYER"), React.createElement("div", {"className": "sh"}, "N"), cols.map((k) => (
+    React.createElement("section", {"className": "stats"}, React.createElement("div", {"className": "stats-head"}, React.createElement("h2", null, "STATS"), React.createElement("div", {"className": "stats-toggle"}, React.createElement("button", {"className": `tog ${view === "session" ? "on" : ""}`, "onClick": () => setView("session")}, "SESSION"), React.createElement("button", {"className": `tog ${view === "global" ? "on" : ""}`, "onClick": () => setView("global")}, "GLOBAL"), React.createElement("button", {"className": `tog ${fullTable ? "on" : ""}`, "onClick": () => setFullTable((f) => !f)}, "FULL"))), React.createElement("div", {"className": "stats-scroll"}, React.createElement("div", {"className": "stats-grid", "style": { gridTemplateColumns: gridCols }}, React.createElement("div", {"className": "sh"}, "PLAYER"), React.createElement("div", {"className": "sh"}, "N"), cols.map((k) => (
             React.createElement("div", {"key": k, "className": "sh"}, STAT_LABELS[k] || k)
           )), rows.map((p) => {
             const v = view === "session" ? p.sessionStats : p.globalStats;
@@ -3542,7 +3540,6 @@ html, body { margin: 0; padding: 0; background: var(--bg); }
 .ss-del-btn:active { color: #ff6090; }
 `;
 
-// Mount
 const root = ReactDOM.createRoot(document.getElementById("root"));
 root.render(React.createElement(App));
 </script>
