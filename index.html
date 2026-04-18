@@ -14,15 +14,15 @@
   * { box-sizing: border-box; margin: 0; padding: 0; }
   html, body, #root { height: 100%; width: 100%; overflow-x: hidden; }
   body { background: #05060a; }
+  #loading { display:flex; align-items:center; justify-content:center; height:100vh; color:#00f5ff; font-family:monospace; font-size:14px; letter-spacing:0.2em; }
 </style>
 </head>
 <body>
-<div id="root"></div>
+<div id="root"><div id="loading">TRCK.iT. loading...</div></div>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/react/18.3.1/umd/react.production.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.3.1/umd/react-dom.production.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/7.26.10/babel.min.js"></script>
 <script>
-// Minimal lucide-react shim — SVG icon components
+// Minimal lucide-react shim
 (function(){
   const h = React.createElement;
   function icon(paths, vb){
@@ -60,7 +60,7 @@
   };
 })();
 </script>
-<script type="text/babel" data-type="module">
+<script>
 const { useState, useEffect, useMemo, useRef } = React;
 const { Trash2, Undo2, ChevronRight, Settings, X, Plus, RotateCcw, ArrowUpDown, RefreshCw } = window.lucideReact;
 
@@ -1329,119 +1329,34 @@ function App() {
   if (!hand && session.active) return null;
 
   return (
-    <div className="app">
-      <style>{CSS}</style>
-      <div className="scanlines" aria-hidden/>
-
-      <Header
-        tableSize={tableSize}
-        setTableSize={setTableSize}
-        onResetTable={resetTable}
-        onSettings={() => setShowSettings(true)}
-        onReorder={() => setReorderMode((r) => !r)}
-        reorderMode={reorderMode}
-        onHistory={() => setShowSessionHistory(true)}
-        onObserver={() => setObservingPlayer("_list")}
-        onExport={exportData}
-        onImport={importData}
-        handStarted={hand ? hand.events.length > 0 : false}
-        sessionActive={session.active}
-      />
-
-      {!session.active ? (
-        <div className="start-session-wrap">
-          <button className="start-session-btn" onClick={startSession}>
-            START SESSION
-          </button>
-          {(!session.room || !session.blind) && (
-            <p className="start-hint">Sélectionne d'abord une room et un blind dans les réglages ⚙</p>
-          )}
-          {session.room && session.blind && (
-            <p className="start-hint">{session.room} — {session.blind}</p>
-          )}
-        </div>
+    React.createElement("div", {"className": "app"}, React.createElement("style", null, CSS), React.createElement("div", {"className": "scanlines", "aria-hidden": true}), React.createElement(Header, {"tableSize": tableSize, "setTableSize": setTableSize, "onResetTable": resetTable, "onSettings": () => setShowSettings(true), "onReorder": () => setReorderMode((r) => !r), "reorderMode": reorderMode, "onHistory": () => setShowSessionHistory(true), "onObserver": () => setObservingPlayer("_list"), "onExport": exportData, "onImport": importData, "handStarted": hand ? hand.events.length > 0 : false, "sessionActive": session.active}), !session.active ? (
+        React.createElement("div", {"className": "start-session-wrap"}, React.createElement("button", {"className": "start-session-btn", "onClick": startSession}, "START SESSION"), (!session.room || !session.blind) && (
+            React.createElement("p", {"className": "start-hint"}, "Sélectionne d'abord une room et un blind dans les réglages ⚙")
+          ), session.room && session.blind && (
+            React.createElement("p", {"className": "start-hint"}, session.room, "—", session.blind)
+          ))
       ) : (
-        <>
-          <StatusBar hand={hand}
-            session={session}
-            elapsed={elapsed}
-            onCommit={() => commitHand()}
-            onShowdown={handlePromptShowdown}
-            onEndSession={endSession}/>
-
-          <HandControls
-            onUndo={undoLast}
-            canUndo={handLog.length > 0}
-            onResetHand={resetHand}
-            straddle={options.straddle}
-            mississippi={options.mississippi}
-            handStarted={hand.events.length > 0}
-            onToggleStraddle={() => {
+        React.createElement(React.Fragment, null, React.createElement(StatusBar, {"hand": hand, "session": session, "elapsed": elapsed, "onCommit": () => commitHand(), "onShowdown": handlePromptShowdown, "onEndSession": endSession}), React.createElement(HandControls, {"onUndo": undoLast, "canUndo": handLog.length > 0, "onResetHand": resetHand, "straddle": options.straddle, "mississippi": options.mississippi, "handStarted": hand.events.length > 0, "onToggleStraddle": () => {
               if (hand.events.length > 0) return;
               setOptions((o) => {
                 if (o.straddle && !o.mississippi) return { ...o, straddle: false };
                 return { ...o, straddle: true, mississippi: false };
               });
-            }}
-            onToggleMississippi={() => {
+            }, "onToggleMississippi": () => {
               if (hand.events.length > 0) return;
               setOptions((o) => {
                 if (o.mississippi) return { ...o, straddle: false, mississippi: false };
                 return { ...o, straddle: true, mississippi: true };
               });
-            }}
-          />
-
-          <PlayerList
-            hand={hand}
-            seats={seats}
-            getPlayerForSeat={getPlayerForSeat}
-            onAction={onAction}
-            onStartEdit={(seatIdx) => setEditingSeat(seatIdx)}
-            onSetSeatStatus={setSeatStatus}
-            reorderMode={reorderMode}
-            moveSeat={moveSeat}
-            canReorder={hand.events.length === 0}
-          />
-
-          <BTNPlacer seats={seats}
-            btnSeatIdx={btnSeatIdx}
-            setBtnSeatIdx={setBtnSeatIdx}/>
-
-          <StatsTable
-            seats={seats}
-            getPlayerForSeat={getPlayerForSeat}
-            view={options.statsView}
-            setView={(v) => setOptions((o) => ({ ...o, statsView: v }))}
-            onResetSession={resetSession}
-          />
-        </>
-      )}
-
-      {editingSeat !== null && (() => {
+            }}), React.createElement(PlayerList, {"hand": hand, "seats": seats, "getPlayerForSeat": getPlayerForSeat, "onAction": onAction, "onStartEdit": (seatIdx) => setEditingSeat(seatIdx), "onSetSeatStatus": setSeatStatus, "reorderMode": reorderMode, "moveSeat": moveSeat, "canReorder": hand.events.length === 0}), React.createElement(BTNPlacer, {"seats": seats, "btnSeatIdx": btnSeatIdx, "setBtnSeatIdx": setBtnSeatIdx}), React.createElement(StatsTable, {"seats": seats, "getPlayerForSeat": getPlayerForSeat, "view": options.statsView, "setView": (v) => setOptions((o) => ({ ...o, statsView: v })), "onResetSession": resetSession}))
+      ), editingSeat !== null && (() => {
         const seat = seats[editingSeat];
         const isRandomSeat = seat && seat.playerId && isRandomId(seat.playerId);
 
         // Real player → can't rename in session
         if (!isRandomSeat) {
           return (
-            <div className="modal-bg" onClick={() => setEditingSeat(null)}>
-              <div className="modal" onClick={(e) => e.stopPropagation()}>
-                <div className="modal-head">
-                  <h3>INFO</h3>
-                  <button className="modal-close" onClick={() => setEditingSeat(null)}><X size={14}/></button>
-                </div>
-                <div className="modal-body">
-                  <p className="opt-hint" style={{ fontSize: 12, lineHeight: 1.5 }}>
-                    Impossible de renommer un joueur en session.
-                  </p>
-                  <p className="opt-hint" style={{ fontSize: 11 }}>
-                    Utilise <strong>SEAT OPEN</strong> (⋯ menu) pour libérer le siège,
-                    ou <strong>mode reorder</strong> (↕) pour changer de place.
-                  </p>
-                </div>
-              </div>
-            </div>
+            React.createElement("div", {"className": "modal-bg", "onClick": () => setEditingSeat(null)}, React.createElement("div", {"className": "modal", "onClick": (e) => e.stopPropagation()}, React.createElement("div", {"className": "modal-head"}, React.createElement("h3", null, "INFO"), React.createElement("button", {"className": "modal-close", "onClick": () => setEditingSeat(null)}, React.createElement(X, {"size": 14}))), React.createElement("div", {"className": "modal-body"}, React.createElement("p", {"className": "opt-hint", "style": { fontSize: 12, lineHeight: 1.5 }}, "Impossible de renommer un joueur en session."), React.createElement("p", {"className": "opt-hint", "style": { fontSize: 11 }}, "Utilise", React.createElement("strong", null, "SEAT OPEN"), "(⋯ menu) pour libérer le siège, ou", React.createElement("strong", null, "mode reorder"), "(↕) pour changer de place."))))
           );
         }
 
@@ -1460,42 +1375,18 @@ function App() {
         };
 
         return (
-          <NameModal
-            key={editingSeat}
-            mode="assign"
-            currentName=""
-            playerDB={playerDB}
-            seats={seats}
-            onPick={(playerId) => doAssign(playerId)}
-            onCreate={(name) => {
+          React.createElement(NameModal, {"key": editingSeat, "mode": "assign", "currentName": "", "playerDB": playerDB, "seats": seats, "onPick": (playerId) => doAssign(playerId), "onCreate": (name) => {
               const id = ensurePlayerInDB(name);
               if (id) doAssign(id);
               else setEditingSeat(null);
-            }}
-            onRename={() => {}}
-            onClose={() => setEditingSeat(null)}
-          />
+            }, "onRename": () => {}, "onClose": () => setEditingSeat(null)})
         );
-      })()}
-
-      {/* Keep or fresh stats modal */}
-      {pendingAssign && (
-        <div className="modal-bg" onClick={() => setPendingAssign(null)}>
-          <div className="modal" onClick={(e) => e.stopPropagation()}>
-            <div className="modal-head">
-              <h3>STATS SESSION</h3>
-              <button className="modal-close" onClick={() => {
+      })(), pendingAssign && (
+        React.createElement("div", {"className": "modal-bg", "onClick": () => setPendingAssign(null)}, React.createElement("div", {"className": "modal", "onClick": (e) => e.stopPropagation()}, React.createElement("div", {"className": "modal-head"}, React.createElement("h3", null, "STATS SESSION"), React.createElement("button", {"className": "modal-close", "onClick": () => {
                 // Cancel: just assign fresh
                 assignPlayerToSeat(pendingAssign.seatIdx, pendingAssign.playerId);
                 setPendingAssign(null);
-              }}><X size={14}/></button>
-            </div>
-            <div className="modal-body">
-              <p className="opt-hint" style={{ fontSize: 12, lineHeight: 1.5, marginBottom: 12 }}>
-                Le joueur précédent avait <strong>{pendingAssign.sessionStats.hands} mains</strong> enregistrées cette session.
-              </p>
-              <div style={{ display: "flex", gap: 8, flexDirection: "column" }}>
-                <button className="name-btn rename" onClick={() => {
+              }}, React.createElement(X, {"size": 14}))), React.createElement("div", {"className": "modal-body"}, React.createElement("p", {"className": "opt-hint", "style": { fontSize: 12, lineHeight: 1.5, marginBottom: 12 }}, "Le joueur précédent avait", React.createElement("strong", null, pendingAssign.sessionStats.hands, "mains"), "enregistrées cette session."), React.createElement("div", {"style": { display: "flex", gap: 8, flexDirection: "column" }}, React.createElement("button", {"className": "name-btn rename", "onClick": () => {
                   assignPlayerToSeat(pendingAssign.seatIdx, pendingAssign.playerId);
                   setPlayerDB((prev) => prev.map((p) =>
                     p.id === pendingAssign.playerId
@@ -1503,61 +1394,19 @@ function App() {
                       : p
                   ));
                   setPendingAssign(null);
-                }}>
-                  GARDER LES STATS SESSION
-                </button>
-                <button className="name-btn rename-reset" onClick={() => {
+                }}, "GARDER LES STATS SESSION"), React.createElement("button", {"className": "name-btn rename-reset", "onClick": () => {
                   assignPlayerToSeat(pendingAssign.seatIdx, pendingAssign.playerId);
                   setPendingAssign(null);
-                }}>
-                  REPARTIR À ZÉRO
-                </button>
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {showSettings && (
-        <SettingsModal
-          session={session}
-          setSession={setSession}
-          rooms={rooms}
-          setRooms={setRooms}
-          blindLevels={blindLevels}
-          setBlindLevels={setBlindLevels}
-          onClose={() => setShowSettings(false)}
-        />
-      )}
-
-      {showShowdown && (
-        <ShowdownModal
-          hand={hand}
-          seats={seats}
-          getPlayerForSeat={getPlayerForSeat}
-          onClose={() => setShowShowdown(false)}
-          onValidate={(data) => commitHand(data)}
-        />
-      )}
-
-      {showSessionHistory && (
-        <SessionHistoryModal
-          history={sessionHistory}
-          onClose={() => setShowSessionHistory(false)}
-        />
-      )}
-
-      {observingPlayer && (
-        <PlayerObserverModal
-          playerDB={playerDB}
-          setPlayerDB={setPlayerDB}
-          rooms={rooms}
-          selected={observingPlayer}
-          onSelect={setObservingPlayer}
-          onClose={() => setObservingPlayer(null)}
-        />
-      )}
-    </div>
+                }}, "REPARTIR À ZÉRO")))))
+      ), showSettings && (
+        React.createElement(SettingsModal, {"session": session, "setSession": setSession, "rooms": rooms, "setRooms": setRooms, "blindLevels": blindLevels, "setBlindLevels": setBlindLevels, "onClose": () => setShowSettings(false)})
+      ), showShowdown && (
+        React.createElement(ShowdownModal, {"hand": hand, "seats": seats, "getPlayerForSeat": getPlayerForSeat, "onClose": () => setShowShowdown(false), "onValidate": (data) => commitHand(data)})
+      ), showSessionHistory && (
+        React.createElement(SessionHistoryModal, {"history": sessionHistory, "onClose": () => setShowSessionHistory(false)})
+      ), observingPlayer && (
+        React.createElement(PlayerObserverModal, {"playerDB": playerDB, "setPlayerDB": setPlayerDB, "rooms": rooms, "selected": observingPlayer, "onSelect": setObservingPlayer, "onClose": () => setObservingPlayer(null)})
+      ))
   );
 }
 
@@ -1669,94 +1518,19 @@ function singleHandToStats(ev, position, sdCards) {
 function Header({ tableSize, setTableSize, onResetTable, onSettings, onReorder, reorderMode, onHistory, onObserver, onExport, onImport, handStarted, sessionActive }) {
   const [menuOpen, setMenuOpen] = useState(false);
   return (
-    <header className="top">
-      <div className="top-bar">
-        <div className="brand">
-          <span className="logo-mark">◤</span>
-          <h1>TRCK<span className="accent">.</span>iT<span className="accent">.</span></h1>
-        </div>
-        <div className="burger-wrap">
-          <button className="burger-btn" onClick={() => setMenuOpen((v) => !v)}>
-            <span className="burger-icon">☰</span>
-          </button>
-          {menuOpen && (
-            <>
-              <div className="burger-bg" onClick={() => setMenuOpen(false)}/>
-              <div className="burger-menu">
-                <button className="burger-item" onClick={() => { setMenuOpen(false); onObserver(); }}>
-                  👤 Player Observer
-                </button>
-                <button className="burger-item" onClick={() => { setMenuOpen(false); onHistory(); }}>
-                  📋 Session History
-                </button>
-                <div className="burger-sep"/>
-                <button className="burger-item" onClick={() => { setMenuOpen(false); onExport(); }}>
-                  💾 Export Data
-                </button>
-                <button className="burger-item" onClick={() => { setMenuOpen(false); onImport(); }}>
-                  📂 Import Data
-                </button>
-              </div>
-            </>
-          )}
-        </div>
-      </div>
-      {sessionActive && (
-        <div className="controls">
-          <label className={`ctrl ${handStarted ? "disabled" : ""}`}>
-            <span style={{ fontSize: 10 }}>👥</span>
-            <select value={tableSize} onChange={(e) => setTableSize(+e.target.value)} disabled={handStarted}>
-              {[2,3,4,5,6,7,8,9].map(n => <option key={n} value={n}>{n}P</option>)}
-            </select>
-          </label>
-          <button className={`btn btn-label ${reorderMode ? "on" : ""}`} onClick={onReorder} disabled={handStarted} title="Réordonner">
-            <ArrowUpDown size={11}/> REORDER
-          </button>
-          <button className="btn btn-label" onClick={onResetTable} disabled={handStarted} title="Reset table">
-            <RefreshCw size={11}/> TABLE
-          </button>
-          <button className="btn" onClick={onSettings} title="Réglages">
-            <Settings size={12}/>
-          </button>
-        </div>
-      )}
-      {!sessionActive && (
-        <div className="controls">
-          <button className="btn" onClick={onSettings} title="Réglages">
-            <Settings size={12}/>
-          </button>
-        </div>
-      )}
-    </header>
+    React.createElement("header", {"className": "top"}, React.createElement("div", {"className": "top-bar"}, React.createElement("div", {"className": "brand"}, React.createElement("span", {"className": "logo-mark"}, "◤"), React.createElement("h1", null, "TRCK", React.createElement("span", {"className": "accent"}, "."), "iT", React.createElement("span", {"className": "accent"}, "."))), React.createElement("div", {"className": "burger-wrap"}, React.createElement("button", {"className": "burger-btn", "onClick": () => setMenuOpen((v) => !v)}, React.createElement("span", {"className": "burger-icon"}, "☰")), menuOpen && (
+            React.createElement(React.Fragment, null, React.createElement("div", {"className": "burger-bg", "onClick": () => setMenuOpen(false)}), React.createElement("div", {"className": "burger-menu"}, React.createElement("button", {"className": "burger-item", "onClick": () => { setMenuOpen(false); onObserver(); }}, "👤 Player Observer"), React.createElement("button", {"className": "burger-item", "onClick": () => { setMenuOpen(false); onHistory(); }}, "📋 Session History"), React.createElement("div", {"className": "burger-sep"}), React.createElement("button", {"className": "burger-item", "onClick": () => { setMenuOpen(false); onExport(); }}, "💾 Export Data"), React.createElement("button", {"className": "burger-item", "onClick": () => { setMenuOpen(false); onImport(); }}, "📂 Import Data")))
+          ))), sessionActive && (
+        React.createElement("div", {"className": "controls"}, React.createElement("label", {"className": `ctrl ${handStarted ? "disabled" : ""}`}, React.createElement("span", {"style": { fontSize: 10 }}, "👥"), React.createElement("select", {"value": tableSize, "onChange": (e) => setTableSize(+e.target.value), "disabled": handStarted}, [2,3,4,5,6,7,8,9].map(n => React.createElement("option", {"key": n, "value": n}, n, "P")))), React.createElement("button", {"className": `btn btn-label ${reorderMode ? "on" : ""}`, "onClick": onReorder, "disabled": handStarted, "title": "Réordonner"}, React.createElement(ArrowUpDown, {"size": 11}), "REORDER"), React.createElement("button", {"className": "btn btn-label", "onClick": onResetTable, "disabled": handStarted, "title": "Reset table"}, React.createElement(RefreshCw, {"size": 11}), "TABLE"), React.createElement("button", {"className": "btn", "onClick": onSettings, "title": "Réglages"}, React.createElement(Settings, {"size": 12})))
+      ), !sessionActive && (
+        React.createElement("div", {"className": "controls"}, React.createElement("button", {"className": "btn", "onClick": onSettings, "title": "Réglages"}, React.createElement(Settings, {"size": 12})))
+      ))
   );
 }
 
 function HandControls({ onUndo, canUndo, onResetHand, straddle, mississippi, onToggleStraddle, onToggleMississippi, handStarted }) {
   return (
-    <div className="hand-controls">
-      <div className="hc-toggles">
-        <button
-          className={`hc-tog ${straddle && !mississippi ? "on" : ""}`}
-          onClick={onToggleStraddle}
-          disabled={handStarted}
-          title="Straddle (UTG)"
-        >STR</button>
-        <button
-          className={`hc-tog ${mississippi ? "on" : ""}`}
-          onClick={onToggleMississippi}
-          disabled={handStarted}
-          title="Mississippi (BU)"
-        >MSP</button>
-      </div>
-      <div className="hc-actions">
-        <button className="hc-btn" onClick={onUndo} disabled={!canUndo} title="Annuler dernière action">
-          <Undo2 size={12}/> UNDO
-        </button>
-        <button className="hc-btn" onClick={onResetHand} title="Réinitialiser la main en cours">
-          <RotateCcw size={12}/> RESET
-        </button>
-      </div>
-    </div>
+    React.createElement("div", {"className": "hand-controls"}, React.createElement("div", {"className": "hc-toggles"}, React.createElement("button", {"className": `hc-tog ${straddle && !mississippi ? "on" : ""}`, "onClick": onToggleStraddle, "disabled": handStarted, "title": "Straddle (UTG)"}, "STR"), React.createElement("button", {"className": `hc-tog ${mississippi ? "on" : ""}`, "onClick": onToggleMississippi, "disabled": handStarted, "title": "Mississippi (BU)"}, "MSP")), React.createElement("div", {"className": "hc-actions"}, React.createElement("button", {"className": "hc-btn", "onClick": onUndo, "disabled": !canUndo, "title": "Annuler dernière action"}, React.createElement(Undo2, {"size": 12}), "UNDO"), React.createElement("button", {"className": "hc-btn", "onClick": onResetHand, "title": "Réinitialiser la main en cours"}, React.createElement(RotateCcw, {"size": 12}), "RESET")))
   );
 }
 
@@ -1764,39 +1538,9 @@ function StatusBar({ hand, session, elapsed, onCommit, onShowdown, onEndSession 
   const closed = hand.closed;
   const aliveCount = hand.inHand.size;
   return (
-    <div className="status-bar">
-      <div className="sb-info">
-        <div className="status-item">
-          <span className="st-l">ROOM</span>
-          <span className="st-v">{session.room || "—"}</span>
-        </div>
-        <div className="status-item">
-          <span className="st-l">BLIND</span>
-          <span className="st-v">{session.blind || "—"}</span>
-        </div>
-        <div className="status-item">
-          <span className="st-l">SESS</span>
-          <span className="st-v">#{session.id}</span>
-        </div>
-        <div className="status-item">
-          <span className="st-l">HANDS</span>
-          <span className="st-v">{session.handCount}</span>
-        </div>
-        <div className="status-item">
-          <span className="st-l">TIME</span>
-          <span className="st-v">{elapsed}</span>
-        </div>
-        <button className="status-end" onClick={onEndSession}>END</button>
-      </div>
-      {closed && (
-        <div className="sb-actions">
-          <button className="next-hand showdown-btn" onClick={onShowdown}>SD</button>
-          <button className="next-hand" onClick={onCommit}>
-            NEXT <ChevronRight size={14}/>
-          </button>
-        </div>
-      )}
-    </div>
+    React.createElement("div", {"className": "status-bar"}, React.createElement("div", {"className": "sb-info"}, React.createElement("div", {"className": "status-item"}, React.createElement("span", {"className": "st-l"}, "ROOM"), React.createElement("span", {"className": "st-v"}, session.room || "—")), React.createElement("div", {"className": "status-item"}, React.createElement("span", {"className": "st-l"}, "BLIND"), React.createElement("span", {"className": "st-v"}, session.blind || "—")), React.createElement("div", {"className": "status-item"}, React.createElement("span", {"className": "st-l"}, "SESS"), React.createElement("span", {"className": "st-v"}, "#", session.id)), React.createElement("div", {"className": "status-item"}, React.createElement("span", {"className": "st-l"}, "HANDS"), React.createElement("span", {"className": "st-v"}, session.handCount)), React.createElement("div", {"className": "status-item"}, React.createElement("span", {"className": "st-l"}, "TIME"), React.createElement("span", {"className": "st-v"}, elapsed)), React.createElement("button", {"className": "status-end", "onClick": onEndSession}, "END")), closed && (
+        React.createElement("div", {"className": "sb-actions"}, React.createElement("button", {"className": "next-hand showdown-btn", "onClick": onShowdown}, "SD"), React.createElement("button", {"className": "next-hand", "onClick": onCommit}, "NEXT", React.createElement(ChevronRight, {"size": 14})))
+      ))
   );
 }
 
@@ -1810,22 +1554,12 @@ function BTNPlacer({ seats, btnSeatIdx, setBtnSeatIdx }) {
     return String(counter);
   });
   return (
-    <div className="btn-placer">
-      <span className="bp-lbl">BTN →</span>
-      {seats.map((s, i) => {
+    React.createElement("div", {"className": "btn-placer"}, React.createElement("span", {"className": "bp-lbl"}, "BTN →"), seats.map((s, i) => {
         const inactive = !isSeatPlayable(s);
         return (
-          <button
-            key={i}
-            className={`bp-dot ${i === btnSeatIdx ? "on" : ""} ${inactive ? "muted" : ""}`}
-            onClick={() => !inactive && setBtnSeatIdx(i)}
-            disabled={inactive}
-          >
-            {labels[i]}
-          </button>
+          React.createElement("button", {"key": i, "className": `bp-dot ${i === btnSeatIdx ? "on" : ""} ${inactive ? "muted" : ""}`, "onClick": () => !inactive && setBtnSeatIdx(i), "disabled": inactive}, labels[i])
         );
-      })}
-    </div>
+      }))
   );
 }
 
@@ -1861,8 +1595,7 @@ function PlayerList({
   useEffect(() => { if (!reorderMode) setSwapFrom(null); }, [reorderMode]);
 
   return (
-    <section className="player-list">
-      {renderOrder.map((seatIdx, visualOrder) => {
+    React.createElement("section", {"className": "player-list"}, renderOrder.map((seatIdx, visualOrder) => {
         const seat = seats[seatIdx];
         if (!seat) return null;
         const player = getPlayerForSeat(seatIdx);
@@ -1880,36 +1613,11 @@ function PlayerList({
         const isSwapTarget = swapFrom !== null && swapFrom !== seatIdx && !seat.isHero;
 
         return (
-          <PlayerRow
-            key={`seat-${seatIdx}`}
-            seatIdx={seatIdx}
-            seatLabel={seatLabel}
-            player={player}
-            pos={pos}
-            isHero={seat.isHero}
-            folded={folded}
-            allActions={allActions}
-            situation={situation}
-            hasActedSinceLastRaise={hasActedSinceLastRaise}
-            handClosed={hand.closed}
-            seatStatus={seat.status || "active"}
-            onAction={(t) => onAction(seatIdx, t)}
-            onStartEdit={() => onStartEdit(seatIdx)}
-            onSeatOpen={() => onSetSeatStatus(seatIdx, "open")}
-            onBreak={() => onSetSeatStatus(seatIdx, "break")}
-            onActivate={() => onSetSeatStatus(seatIdx, "active")}
-            reorderMode={reorderMode}
-            canReorder={canReorder}
-            isSwapFrom={isSwapFrom}
-            isSwapTarget={isSwapTarget}
-            onSwapClick={() => handleSwapClick(seatIdx)}
-          />
+          React.createElement(PlayerRow, {"key": `seat-${seatIdx}`, "seatIdx": seatIdx, "seatLabel": seatLabel, "player": player, "pos": pos, "isHero": seat.isHero, "folded": folded, "allActions": allActions, "situation": situation, "hasActedSinceLastRaise": hasActedSinceLastRaise, "handClosed": hand.closed, "seatStatus": seat.status || "active", "onAction": (t) => onAction(seatIdx, t), "onStartEdit": () => onStartEdit(seatIdx), "onSeatOpen": () => onSetSeatStatus(seatIdx, "open"), "onBreak": () => onSetSeatStatus(seatIdx, "break"), "onActivate": () => onSetSeatStatus(seatIdx, "active"), "reorderMode": reorderMode, "canReorder": canReorder, "isSwapFrom": isSwapFrom, "isSwapTarget": isSwapTarget, "onSwapClick": () => handleSwapClick(seatIdx)})
         );
-      })}
-      {swapFrom !== null && (
-        <div className="swap-hint">Tape un autre siège pour intervertir</div>
-      )}
-    </section>
+      }), swapFrom !== null && (
+        React.createElement("div", {"className": "swap-hint"}, "Tape un autre siège pour intervertir")
+      ))
   );
 }
 
@@ -1927,98 +1635,37 @@ function PlayerRow({
   const hasActions = allActions && allActions.length > 0;
 
   return (
-    <div
-      data-seat={seatIdx}
-      className={`row ${isHero ? "hero" : ""} ${folded ? "folded" : ""} ${situation ? "can-act" : ""} ${isOpen ? "seat-open" : ""} ${isBreak ? "seat-break" : ""} ${isSwapFrom ? "swap-from" : ""} ${isSwapTarget ? "swap-target" : ""}`}
-      onClick={reorderMode && canReorder && (isSwapTarget || (!isHero && !isSwapFrom)) ? onSwapClick : undefined}
-    >
-      <div className="row-left">
-        <div className="row-pos">
-          <span className={`pos-name pos-${(pos || "").toLowerCase().replace(/[^a-z]/g, "")}`}>
-            {inactive ? "—" : (pos || "?")}
-          </span>
-          <span className="seat-id">{seatLabel}</span>
-        </div>
-
-        <div className="row-info">
-          <button
-            className={`row-name ${isHero ? "hero-name" : ""} ${player?.isRandom ? "random-name" : ""} ${inactive ? "inactive-name" : ""}`}
-            onClick={reorderMode ? undefined : (isHero ? undefined : onStartEdit)}
-          >
-            {player?.name || "?"}
-          </button>
-
-          {isOpen && <span className="row-tag-inline tag-color-seatopen">SEAT OPEN</span>}
-          {isBreak && <span className="row-tag-inline tag-color-break">BREAK</span>}
-          {!inactive && hasActions && !reorderMode && (
-            <div className="row-actions-history">
-              {allActions.map((ev, i) => (
-                <span key={i} className={`action-label action-${ev.kind}`}>
-                  {ACTION_LABELS[ev.kind] || ev.kind.toUpperCase()}
-                </span>
-              ))}
-            </div>
-          )}
-        </div>
-      </div>
-
-      <div className="row-right">
-        {reorderMode ? (
+    React.createElement("div", {"data-seat": seatIdx, "className": `row ${isHero ? "hero" : ""} ${folded ? "folded" : ""} ${situation ? "can-act" : ""} ${isOpen ? "seat-open" : ""} ${isBreak ? "seat-break" : ""} ${isSwapFrom ? "swap-from" : ""} ${isSwapTarget ? "swap-target" : ""}`, "onClick": reorderMode && canReorder && (isSwapTarget || (!isHero && !isSwapFrom)) ? onSwapClick : undefined}, React.createElement("div", {"className": "row-left"}, React.createElement("div", {"className": "row-pos"}, React.createElement("span", {"className": `pos-name pos-${(pos || "").toLowerCase().replace(/[^a-z]/g, "")}`}, inactive ? "—" : (pos || "?")), React.createElement("span", {"className": "seat-id"}, seatLabel)), React.createElement("div", {"className": "row-info"}, React.createElement("button", {"className": `row-name ${isHero ? "hero-name" : ""} ${player?.isRandom ? "random-name" : ""} ${inactive ? "inactive-name" : ""}`, "onClick": reorderMode ? undefined : (isHero ? undefined : onStartEdit)}, player?.name || "?"), isOpen && React.createElement("span", {"className": "row-tag-inline tag-color-seatopen"}, "SEAT OPEN"), isBreak && React.createElement("span", {"className": "row-tag-inline tag-color-break"}, "BREAK"), !inactive && hasActions && !reorderMode && (
+            React.createElement("div", {"className": "row-actions-history"}, allActions.map((ev, i) => (
+                React.createElement("span", {"key": i, "className": `action-label action-${ev.kind}`}, ACTION_LABELS[ev.kind] || ev.kind.toUpperCase())
+              )))
+          ))), React.createElement("div", {"className": "row-right"}, reorderMode ? (
           isHero ? (
-            <span className="row-status">hero</span>
+            React.createElement("span", {"className": "row-status"}, "hero")
           ) : !canReorder ? (
-            <span className="row-status muted">locked</span>
+            React.createElement("span", {"className": "row-status muted"}, "locked")
           ) : isSwapFrom ? (
-            <span className="row-status swap-label">SELECTED</span>
+            React.createElement("span", {"className": "row-status swap-label"}, "SELECTED")
           ) : (
-            <span className="row-status swap-label-target">TAP</span>
+            React.createElement("span", {"className": "row-status swap-label-target"}, "TAP")
           )
         ) : inactive ? (
-          <button className="act act-neutral" onClick={onActivate}>
-            ← ACTIVE
-          </button>
+          React.createElement("button", {"className": "act act-neutral", "onClick": onActivate}, "← ACTIVE")
         ) : situation ? (
           menuOpen ? (
-            <div className="act-row">
-              <button className="act act-mute" onClick={() => setMenuOpen(false)}>
-                <X size={10}/>
-              </button>
-              <button className="act act-danger" onClick={() => { setMenuOpen(false); onSeatOpen(); }}>
-                OPEN
-              </button>
-              <button className="act act-warn" onClick={() => { setMenuOpen(false); onBreak(); }}>
-                BREAK
-              </button>
-            </div>
+            React.createElement("div", {"className": "act-row"}, React.createElement("button", {"className": "act act-mute", "onClick": () => setMenuOpen(false)}, React.createElement(X, {"size": 10})), React.createElement("button", {"className": "act act-danger", "onClick": () => { setMenuOpen(false); onSeatOpen(); }}, "OPEN"), React.createElement("button", {"className": "act act-warn", "onClick": () => { setMenuOpen(false); onBreak(); }}, "BREAK"))
           ) : (
-            <>
-              <div className="act-row">
-                {situation.actions.map((a) => (
-                  <button
-                    key={a.type}
-                    className={`act act-${a.tone}`}
-                    onClick={() => onAction(a.type)}
-                  >
-                    {a.label}
-                  </button>
-                ))}
-              </div>
-              {!isHero && (
-                <button
-                  className="row-menu-btn"
-                  onClick={() => setMenuOpen(true)}
-                  title="Seat open / break"
-                >⋮</button>
-              )}
-            </>
+            React.createElement(React.Fragment, null, React.createElement("div", {"className": "act-row"}, situation.actions.map((a) => (
+                  React.createElement("button", {"key": a.type, "className": `act act-${a.tone}`, "onClick": () => onAction(a.type)}, a.label)
+                ))), !isHero && (
+                React.createElement("button", {"className": "row-menu-btn", "onClick": () => setMenuOpen(true), "title": "Seat open / break"}, "⋮")
+              ))
           )
         ) : folded ? (
-          <span className="row-status muted">—</span>
+          React.createElement("span", {"className": "row-status muted"}, "—")
         ) : hasActedSinceLastRaise && !handClosed ? (
-          <span className="row-status">wait</span>
-        ) : null}
-      </div>
-    </div>
+          React.createElement("span", {"className": "row-status"}, "wait")
+        ) : null))
   );
 }
 
@@ -2081,77 +1728,22 @@ function NameModal({
   };
 
   return (
-    <div className="modal-bg" onClick={(e) => {
+    React.createElement("div", {"className": "modal-bg", "onClick": (e) => {
       if (e.target === e.currentTarget) onClose();
-    }}>
-      <div className="modal name-modal" onClick={(e) => e.stopPropagation()}>
-        <div className="modal-head">
-          <h3>{mode === "rename" ? "RENOMMER" : "CHOISIR JOUEUR"}</h3>
-          <button className="modal-close" onClick={onClose}><X size={14}/></button>
-        </div>
-        <form className="modal-body" onSubmit={handleSubmit}>
-          <input
-            ref={inputRef}
-            className="name-input"
-            value={text}
-            onChange={(e) => setText(e.target.value)}
-            placeholder="nom du joueur..."
-            maxLength={20}
-            autoComplete="off"
-            autoCorrect="off"
-            autoCapitalize="off"
-            spellCheck="false"
-          />
-
-          <div className="name-actions">
-            {mode === "rename" && exactMatch && normalizeName(exactMatch.name) === normalized ? null : normalized && !exactMatch ? (
-              <button type="button" className="name-btn create" onClick={handleCreate}>
-                <Plus size={14}/> CRÉER "{normalized}"
-              </button>
-            ) : null}
-            {mode === "rename" && normalized && normalized !== normalizeName(currentName) && (
-              <>
-                <button type="button" className="name-btn rename" onClick={handleRenameKeep}>
-                  REMPLACER (garder stats session)
-                </button>
-                <button type="button" className="name-btn rename-reset" onClick={handleRenameReset}>
-                  REMPLACER (fresh)
-                </button>
-              </>
-            )}
-          </div>
-
-          {mode === "assign" && (
-            <>
-              <div className="name-divider">
-                <span>{matches.length > 0 ? "JOUEURS EXISTANTS" : "AUCUN JOUEUR"}</span>
-              </div>
-              <div className="name-list">
-                {matches.map((p) => {
+    }}, React.createElement("div", {"className": "modal name-modal", "onClick": (e) => e.stopPropagation()}, React.createElement("div", {"className": "modal-head"}, React.createElement("h3", null, mode === "rename" ? "RENOMMER" : "CHOISIR JOUEUR"), React.createElement("button", {"className": "modal-close", "onClick": onClose}, React.createElement(X, {"size": 14}))), React.createElement("form", {"className": "modal-body", "onSubmit": handleSubmit}, React.createElement("input", {"ref": inputRef, "className": "name-input", "value": text, "onChange": (e) => setText(e.target.value), "placeholder": "nom du joueur...", "maxLength": 20, "autoComplete": "off", "autoCorrect": "off", "autoCapitalize": "off", "spellCheck": "false"}), React.createElement("div", {"className": "name-actions"}, mode === "rename" && exactMatch && normalizeName(exactMatch.name) === normalized ? null : normalized && !exactMatch ? (
+              React.createElement("button", {"type": "button", "className": "name-btn create", "onClick": handleCreate}, React.createElement(Plus, {"size": 14}), "CRÉER \"", normalized, "\"")
+            ) : null, mode === "rename" && normalized && normalized !== normalizeName(currentName) && (
+              React.createElement(React.Fragment, null, React.createElement("button", {"type": "button", "className": "name-btn rename", "onClick": handleRenameKeep}, "REMPLACER (garder stats session)"), React.createElement("button", {"type": "button", "className": "name-btn rename-reset", "onClick": handleRenameReset}, "REMPLACER (fresh)"))
+            )), mode === "assign" && (
+            React.createElement(React.Fragment, null, React.createElement("div", {"className": "name-divider"}, React.createElement("span", null, matches.length > 0 ? "JOUEURS EXISTANTS" : "AUCUN JOUEUR")), React.createElement("div", {"className": "name-list"}, matches.map((p) => {
                   const isSeated = seatedIds.has(p.id);
                   return (
-                    <button
-                      key={p.id}
-                      type="button"
-                      className={`name-item ${isSeated ? "name-item-seated" : ""}`}
-                      onClick={() => !isSeated && onPick(p.id)}
-                      disabled={isSeated}
-                    >
-                      <span className="ni-name">{p.name}</span>
-                      {isSeated && <span className="ni-seated">À TABLE</span>}
-                      <span className="ni-meta">{(p.globalStats || emptyStats()).hands} mains</span>
-                    </button>
+                    React.createElement("button", {"key": p.id, "type": "button", "className": `name-item ${isSeated ? "name-item-seated" : ""}`, "onClick": () => !isSeated && onPick(p.id), "disabled": isSeated}, React.createElement("span", {"className": "ni-name"}, p.name), isSeated && React.createElement("span", {"className": "ni-seated"}, "À TABLE"), React.createElement("span", {"className": "ni-meta"}, (p.globalStats || emptyStats()).hands, "mains"))
                   );
-                })}
-                {matches.length === 0 && !normalized && (
-                  <div className="name-empty">Base vide. Tape un nom pour créer le premier joueur.</div>
-                )}
-              </div>
-            </>
-          )}
-        </form>
-      </div>
-    </div>
+                }), matches.length === 0 && !normalized && (
+                  React.createElement("div", {"className": "name-empty"}, "Base vide. Tape un nom pour créer le premier joueur.")
+                )))
+          ))))
   );
 }
 
@@ -2191,48 +1783,20 @@ function StatsTable({ seats, getPlayerForSeat, view, setView, onResetSession }) 
   };
 
   return (
-    <section className="stats">
-      <div className="stats-head">
-        <h2>&gt; STATS</h2>
-        <div className="stats-toggle">
-          <button className={`tog ${view === "session" ? "on" : ""}`}
-            onClick={() => setView("session")}>SESSION</button>
-          <button className={`tog ${view === "global" ? "on" : ""}`}
-            onClick={() => setView("global")}>GLOBAL</button>
-          <button className={`tog ${fullTable ? "on" : ""}`}
-            onClick={() => setFullTable((f) => !f)}>FULL</button>
-        </div>
-      </div>
-      <div className="stats-scroll">
-        <div className="stats-grid" style={{ gridTemplateColumns: gridCols }}>
-          <div className="sh">PLAYER</div>
-          <div className="sh">N</div>
-          {cols.map((k) => (
-            <div key={k} className="sh">{STAT_LABELS[k] || k}</div>
-          ))}
-          {rows.map((p) => {
+    React.createElement("section", {"className": "stats"}, React.createElement("div", {"className": "stats-head"}, React.createElement("h2", null, "&gt; STATS"), React.createElement("div", {"className": "stats-toggle"}, React.createElement("button", {"className": `tog ${view === "session" ? "on" : ""}`, "onClick": () => setView("session")}, "SESSION"), React.createElement("button", {"className": `tog ${view === "global" ? "on" : ""}`, "onClick": () => setView("global")}, "GLOBAL"), React.createElement("button", {"className": `tog ${fullTable ? "on" : ""}`, "onClick": () => setFullTable((f) => !f)}, "FULL"))), React.createElement("div", {"className": "stats-scroll"}, React.createElement("div", {"className": "stats-grid", "style": { gridTemplateColumns: gridCols }}, React.createElement("div", {"className": "sh"}, "PLAYER"), React.createElement("div", {"className": "sh"}, "N"), cols.map((k) => (
+            React.createElement("div", {"key": k, "className": "sh"}, STAT_LABELS[k] || k)
+          )), rows.map((p) => {
             const v = view === "session" ? p.sessionStats : p.globalStats;
             if (!v) return null;
             const isDrilled = drillCell && drillCell.playerId === p.id;
             return (
-              <React.Fragment key={p.id}>
-                <div className={`sc name ${p.isHero ? "hero-row" : ""} ${p.isRandom ? "random-row" : ""}`}>{p.name}</div>
-                <div className="sc dim mono">{v.hands || 0}</div>
-                {cols.map((k) => {
+              React.createElement(React.Fragment, {"key": p.id}, React.createElement("div", {"className": `sc name ${p.isHero ? "hero-row" : ""} ${p.isRandom ? "random-row" : ""}`}, p.name), React.createElement("div", {"className": "sc dim mono"}, v.hands || 0), cols.map((k) => {
                   const s = v[k] || { opp: 0, act: 0 };
                   const isActive = isDrilled && drillCell.statKey === k;
                   return (
-                    <StatCell
-                      key={k}
-                      s={s}
-                      kind={k}
-                      active={isActive}
-                      onClick={() => toggleDrill(p.id, k)}
-                    />
+                    React.createElement(StatCell, {"key": k, "s": s, "kind": k, "active": isActive, "onClick": () => toggleDrill(p.id, k)})
                   );
-                })}
-                {/* Drill row: position breakdown */}
-                {isDrilled && (() => {
+                }), isDrilled && (() => {
                   const byPos = v.byPos || {};
                   const sk = drillCell.statKey;
                   const showSDPos = drillCell.showSDPos || null;
@@ -2241,13 +1805,7 @@ function StatsTable({ seats, getPlayerForSeat, view, setView, onResetSession }) 
                     showSDPos: prev.showSDPos === pos ? null : pos,
                   }));
                   return (
-                    <div className="drill-row" style={{ gridColumn: `1 / -1` }}>
-                      <div className="drill-row-head">
-                        <span>{p.name} — {STAT_LABELS[sk] || sk}</span>
-                        <button className="drill-close" onClick={() => setDrillCell(null)}><X size={10}/></button>
-                      </div>
-                      <div className="drill-row-cols">
-                        {POSITION_ORDER.map((pos) => {
+                    React.createElement("div", {"className": "drill-row", "style": { gridColumn: `1 / -1` }}, React.createElement("div", {"className": "drill-row-head"}, React.createElement("span", null, p.name, "—", STAT_LABELS[sk] || sk), React.createElement("button", {"className": "drill-close", "onClick": () => setDrillCell(null)}, React.createElement(X, {"size": 10}))), React.createElement("div", {"className": "drill-row-cols"}, POSITION_ORDER.map((pos) => {
                           const posData = byPos[pos];
                           const ps = posData?.[sk] || { opp: 0, act: 0 };
                           const hasData = posData && posData.hands > 0;
@@ -2255,48 +1813,23 @@ function StatsTable({ seats, getPlayerForSeat, view, setView, onResetSession }) 
                           const sds = posData?.showdowns || [];
                           const hasSD = sds.length > 0;
                           return (
-                            <div key={pos} className={`drill-col ${hasSD ? "drill-col-sd" : ""}`}
-                              onClick={hasSD ? () => toggleSD(pos) : undefined}>
-                              <span className="drill-col-pos">{pos}</span>
-                              <span className="drill-col-val" style={{ color: val === null ? "var(--dim)" : statColor(val, sk) }}>
-                                {val === null ? "NA" : `${val}`}
-                              </span>
-                              <span className="drill-col-frac">
-                                {hasData ? `${ps.act}/${ps.opp}` : "—"}
-                              </span>
-                              {hasSD && <span className="drill-sd-badge">🃏{sds.length}</span>}
-                              {showSDPos === pos && (
-                                <div className="drill-sd-list">
-                                  {sds.map((h, i) => <span key={i} className="drill-sd-hand">{h}</span>)}
-                                </div>
-                              )}
-                            </div>
+                            React.createElement("div", {"key": pos, "className": `drill-col ${hasSD ? "drill-col-sd" : ""}`, "onClick": hasSD ? () => toggleSD(pos) : undefined}, React.createElement("span", {"className": "drill-col-pos"}, pos), React.createElement("span", {"className": "drill-col-val", "style": { color: val === null ? "var(--dim)" : statColor(val, sk) }}, val === null ? "NA" : `${val}`), React.createElement("span", {"className": "drill-col-frac"}, hasData ? `${ps.act}/${ps.opp}` : "—"), hasSD && React.createElement("span", {"className": "drill-sd-badge"}, "🃏", sds.length), showSDPos === pos && (
+                                React.createElement("div", {"className": "drill-sd-list"}, sds.map((h, i) => React.createElement("span", {"key": i, "className": "drill-sd-hand"}, h)))
+                              ))
                           );
-                        })}
-                      </div>
-                    </div>
+                        })))
                   );
-                })()}
-              </React.Fragment>
+                })())
             );
-          })}
-        </div>
-      </div>
-      <div className="stats-footer">
-        <button className="reset-link" onClick={onResetSession}>reset session</button>
-      </div>
-    </section>
+          }))), React.createElement("div", {"className": "stats-footer"}, React.createElement("button", {"className": "reset-link", "onClick": onResetSession}, "reset session")))
   );
 }
 
 function StatCell({ s, kind, active, onClick }) {
-  if (!s) return <div className="sc"><span className="sc-val" style={{ color: "var(--dim)" }}>—</span></div>;
+  if (!s) return React.createElement("div", {"className": "sc"}, React.createElement("span", {"className": "sc-val", "style": { color: "var(--dim)" }}, "—"));
   const v = pct(s.opp, s.act);
   return (
-    <div className={`sc sc-clickable ${active ? "sc-active" : ""}`} onClick={onClick}>
-      <span className="sc-val" style={{ color: statColor(v, kind) }}>{fmt(v)}</span>
-      <span className="sc-frac">{s.act}/{s.opp}</span>
-    </div>
+    React.createElement("div", {"className": `sc sc-clickable ${active ? "sc-active" : ""}`, "onClick": onClick}, React.createElement("span", {"className": "sc-val", "style": { color: statColor(v, kind) }}, fmt(v)), React.createElement("span", {"className": "sc-frac"}, s.act, "/", s.opp))
   );
 }
 
@@ -2325,90 +1858,29 @@ function SettingsModal({
   };
 
   return (
-    <div className="modal-bg" onClick={(e) => {
+    React.createElement("div", {"className": "modal-bg", "onClick": (e) => {
       if (e.target === e.currentTarget) onClose();
-    }}>
-      <div className="modal modal-wide">
-        <div className="modal-head">
-          <h3>SETTINGS</h3>
-          <button className="modal-close" onClick={onClose}><X size={14}/></button>
-        </div>
-        <div className="modal-body" style={{ maxHeight: "70vh", overflowY: "auto" }}>
-
-          {locked && (
-            <p className="opt-hint" style={{ color: "var(--cy-yellow)", marginBottom: 10 }}>
-              Session en cours — room et blind verrouillés.
-            </p>
-          )}
-
-          {/* Room editor */}
-          <div className="settings-section">
-            <span className="ss-label">ROOM</span>
-            <div className="ss-chips">
-              {rooms.map((r) => (
-                <div key={r} className="ss-chip-wrap">
-                  <button
-                    className={`ss-chip ${session.room === r ? "on" : ""}`}
-                    onClick={() => !locked && setSession((s) => ({ ...s, room: r }))}
-                    disabled={locked}
-                  >{r}</button>
-                  {!locked && (
-                    <button className="ss-chip-del" onClick={() => {
+    }}, React.createElement("div", {"className": "modal modal-wide"}, React.createElement("div", {"className": "modal-head"}, React.createElement("h3", null, "SETTINGS"), React.createElement("button", {"className": "modal-close", "onClick": onClose}, React.createElement(X, {"size": 14}))), React.createElement("div", {"className": "modal-body", "style": { maxHeight: "70vh", overflowY: "auto" }}, locked && (
+            React.createElement("p", {"className": "opt-hint", "style": { color: "var(--cy-yellow)", marginBottom: 10 }}, "Session en cours — room et blind verrouillés.")
+          ), React.createElement("div", {"className": "settings-section"}, React.createElement("span", {"className": "ss-label"}, "ROOM"), React.createElement("div", {"className": "ss-chips"}, rooms.map((r) => (
+                React.createElement("div", {"key": r, "className": "ss-chip-wrap"}, React.createElement("button", {"className": `ss-chip ${session.room === r ? "on" : ""}`, "onClick": () => !locked && setSession((s) => ({ ...s, room: r })), "disabled": locked}, r), !locked && (
+                    React.createElement("button", {"className": "ss-chip-del", "onClick": () => {
                       setRooms((prev) => prev.filter((x) => x !== r));
                       if (session.room === r) setSession((s) => ({ ...s, room: "" }));
-                    }}><X size={8}/></button>
-                  )}
-                </div>
-              ))}
-            </div>
-            {!locked && (
-              <div className="ss-add-row">
-                <input className="ss-input" placeholder="New room..."
-                  value={newRoom} onChange={(e) => setNewRoom(e.target.value)}
-                  onKeyDown={(e) => e.key === "Enter" && addRoom()}/>
-                <button className="ss-add-btn" onClick={addRoom}><Plus size={12}/></button>
-              </div>
-            )}
-          </div>
-
-          {/* Blind editor */}
-          <div className="settings-section">
-            <span className="ss-label">BLIND</span>
-            <div className="ss-chips">
-              {blindLevels.map((b) => (
-                <div key={b} className="ss-chip-wrap">
-                  <button
-                    className={`ss-chip ${session.blind === b ? "on" : ""}`}
-                    onClick={() => !locked && setSession((s) => ({ ...s, blind: b }))}
-                    disabled={locked}
-                  >{b}</button>
-                  {!locked && (
-                    <button className="ss-chip-del" onClick={() => {
+                    }}, React.createElement(X, {"size": 8}))
+                  ))
+              ))), !locked && (
+              React.createElement("div", {"className": "ss-add-row"}, React.createElement("input", {"className": "ss-input", "placeholder": "New room...", "value": newRoom, "onChange": (e) => setNewRoom(e.target.value), "onKeyDown": (e) => e.key === "Enter" && addRoom()}), React.createElement("button", {"className": "ss-add-btn", "onClick": addRoom}, React.createElement(Plus, {"size": 12})))
+            )), React.createElement("div", {"className": "settings-section"}, React.createElement("span", {"className": "ss-label"}, "BLIND"), React.createElement("div", {"className": "ss-chips"}, blindLevels.map((b) => (
+                React.createElement("div", {"key": b, "className": "ss-chip-wrap"}, React.createElement("button", {"className": `ss-chip ${session.blind === b ? "on" : ""}`, "onClick": () => !locked && setSession((s) => ({ ...s, blind: b })), "disabled": locked}, b), !locked && (
+                    React.createElement("button", {"className": "ss-chip-del", "onClick": () => {
                       setBlindLevels((prev) => prev.filter((x) => x !== b));
                       if (session.blind === b) setSession((s) => ({ ...s, blind: "" }));
-                    }}><X size={8}/></button>
-                  )}
-                </div>
-              ))}
-            </div>
-            {!locked && (
-              <div className="ss-add-row">
-                <input className="ss-input" placeholder="New blind..."
-                  value={newBlind} onChange={(e) => setNewBlind(e.target.value)}
-                  onKeyDown={(e) => e.key === "Enter" && addBlind()}/>
-                <button className="ss-add-btn" onClick={addBlind}><Plus size={12}/></button>
-              </div>
-            )}
-          </div>
-
-        </div>
-        <div className="modal-foot">
-          <button className="next-hand" onClick={onClose} style={{ animation: "none", width: "100%" }}>
-            VALIDER
-          </button>
-        </div>
-      </div>
-    </div>
+                    }}, React.createElement(X, {"size": 8}))
+                  ))
+              ))), !locked && (
+              React.createElement("div", {"className": "ss-add-row"}, React.createElement("input", {"className": "ss-input", "placeholder": "New blind...", "value": newBlind, "onChange": (e) => setNewBlind(e.target.value), "onKeyDown": (e) => e.key === "Enter" && addBlind()}), React.createElement("button", {"className": "ss-add-btn", "onClick": addBlind}, React.createElement(Plus, {"size": 12})))
+            ))), React.createElement("div", {"className": "modal-foot"}, React.createElement("button", {"className": "next-hand", "onClick": onClose, "style": { animation: "none", width: "100%" }}, "VALIDER"))))
   );
 }
 
@@ -2442,76 +1914,34 @@ function ShowdownModal({ hand, seats, getPlayerForSeat, onClose, onValidate }) {
   };
 
   return (
-    <div className="modal-bg" onClick={(e) => {
+    React.createElement("div", {"className": "modal-bg", "onClick": (e) => {
       if (e.target === e.currentTarget) onClose();
-    }}>
-      <div className="modal modal-wide">
-        <div className="modal-head">
-          <h3>SHOWDOWN</h3>
-          <button className="modal-close" onClick={onClose}><X size={14}/></button>
-        </div>
-        <div className="modal-body">
-          {survivors.map((seatIdx) => {
+    }}, React.createElement("div", {"className": "modal modal-wide"}, React.createElement("div", {"className": "modal-head"}, React.createElement("h3", null, "SHOWDOWN"), React.createElement("button", {"className": "modal-close", "onClick": onClose}, React.createElement(X, {"size": 14}))), React.createElement("div", {"className": "modal-body"}, survivors.map((seatIdx) => {
             const player = getPlayerForSeat(seatIdx);
             const pos = hand.positions[seatIdx];
             const playerCards = cards[seatIdx] || [];
             const isPicking = pickingFor === seatIdx;
             return (
-              <div key={seatIdx} className={`sd-row ${isPicking ? "sd-active" : ""}`}>
-                <div className="sd-name">
-                  <span className="sd-pos">{pos}</span>
-                  <span>{player?.name || "?"}</span>
-                </div>
-                <div className="sd-cards">
-                  {playerCards.map((c, i) => (
-                    <span key={i} className="sd-card-badge" onClick={() => {
+              React.createElement("div", {"key": seatIdx, "className": `sd-row ${isPicking ? "sd-active" : ""}`}, React.createElement("div", {"className": "sd-name"}, React.createElement("span", {"className": "sd-pos"}, pos), React.createElement("span", null, player?.name || "?")), React.createElement("div", {"className": "sd-cards"}, playerCards.map((c, i) => (
+                    React.createElement("span", {"key": i, "className": "sd-card-badge", "onClick": () => {
                       setCards({ ...cards, [seatIdx]: playerCards.filter((_, j) => j !== i) });
-                    }}>
-                      {c[0]}<span style={{ color: SUITS.find(s => s.key === c[1])?.color }}>{SUITS.find(s => s.key === c[1])?.symbol}</span>
-                    </span>
-                  ))}
-                  {playerCards.length < 2 && (
-                    <button className="sd-pick-btn" onClick={() => setPickingFor(isPicking ? null : seatIdx)}>
-                      {isPicking ? "✕" : "+"}
-                    </button>
-                  )}
-                </div>
-              </div>
+                    }}, c[0], React.createElement("span", {"style": { color: SUITS.find(s => s.key === c[1])?.color }}, SUITS.find(s => s.key === c[1])?.symbol))
+                  )), playerCards.length < 2 && (
+                    React.createElement("button", {"className": "sd-pick-btn", "onClick": () => setPickingFor(isPicking ? null : seatIdx)}, isPicking ? "✕" : "+")
+                  )))
             );
-          })}
-
-          {pickingFor !== null && (
-            <div className="card-picker">
-              {SUITS.map((suit) => (
-                <div key={suit.key} className="cp-suit-row">
-                  {RANKS.map((rank) => {
+          }), pickingFor !== null && (
+            React.createElement("div", {"className": "card-picker"}, SUITS.map((suit) => (
+                React.createElement("div", {"key": suit.key, "className": "cp-suit-row"}, RANKS.map((rank) => {
                     const card = rank + suit.key;
                     const used = usedCards.has(card) && !(cards[pickingFor] || []).includes(card);
                     const selected = (cards[pickingFor] || []).includes(card);
                     return (
-                      <button
-                        key={card}
-                        className={`cp-card ${selected ? "selected" : ""} ${used ? "used" : ""}`}
-                        style={{ color: suit.color }}
-                        onClick={() => !used && toggleCard(card)}
-                        disabled={used}
-                      >
-                        <span className="cp-rank">{rank}</span>
-                        <span className="cp-suit">{suit.symbol}</span>
-                      </button>
+                      React.createElement("button", {"key": card, "className": `cp-card ${selected ? "selected" : ""} ${used ? "used" : ""}`, "style": { color: suit.color }, "onClick": () => !used && toggleCard(card), "disabled": used}, React.createElement("span", {"className": "cp-rank"}, rank), React.createElement("span", {"className": "cp-suit"}, suit.symbol))
                     );
-                  })}
-                </div>
-              ))}
-            </div>
-          )}
-        </div>
-        <div className="modal-foot">
-          <button className="btn" onClick={onClose}>annuler</button>
-          <button className="next-hand" onClick={() => onValidate(cards)}>VALIDER & NEXT</button>
-        </div>
-      </div>
-    </div>
+                  }))
+              )))
+          )), React.createElement("div", {"className": "modal-foot"}, React.createElement("button", {"className": "btn", "onClick": onClose}, "annuler"), React.createElement("button", {"className": "next-hand", "onClick": () => onValidate(cards)}, "VALIDER & NEXT"))))
   );
 }
 
@@ -2524,31 +1954,9 @@ function SessionHistoryModal({ history, onClose }) {
   };
   const sorted = [...history].reverse();
   return (
-    <div className="modal-bg" onClick={(e) => { if (e.target === e.currentTarget) onClose(); }}>
-      <div className="modal modal-wide">
-        <div className="modal-head">
-          <h3>SESSION HISTORY</h3>
-          <button className="modal-close" onClick={onClose}><X size={14}/></button>
-        </div>
-        <div className="modal-body" style={{ maxHeight: "70vh", overflowY: "auto" }}>
-          {sorted.length === 0 && <p className="opt-hint">Aucune session terminée.</p>}
-          {sorted.map((s, i) => (
-            <div key={i} className="sh-row">
-              <div className="sh-id">#{s.id}</div>
-              <div className="sh-details">
-                <span className="sh-room">{s.room || "—"}</span>
-                <span className="sh-blind">{s.blind || "—"}</span>
-              </div>
-              <div className="sh-meta">
-                <span>{s.handCount} hands</span>
-                <span>{fmtDur(s.duration)}</span>
-                <span className="sh-date">{new Date(s.date).toLocaleDateString()}</span>
-              </div>
-            </div>
-          ))}
-        </div>
-      </div>
-    </div>
+    React.createElement("div", {"className": "modal-bg", "onClick": (e) => { if (e.target === e.currentTarget) onClose(); }}, React.createElement("div", {"className": "modal modal-wide"}, React.createElement("div", {"className": "modal-head"}, React.createElement("h3", null, "SESSION HISTORY"), React.createElement("button", {"className": "modal-close", "onClick": onClose}, React.createElement(X, {"size": 14}))), React.createElement("div", {"className": "modal-body", "style": { maxHeight: "70vh", overflowY: "auto" }}, sorted.length === 0 && React.createElement("p", {"className": "opt-hint"}, "Aucune session terminée."), sorted.map((s, i) => (
+            React.createElement("div", {"key": i, "className": "sh-row"}, React.createElement("div", {"className": "sh-id"}, "#", s.id), React.createElement("div", {"className": "sh-details"}, React.createElement("span", {"className": "sh-room"}, s.room || "—"), React.createElement("span", {"className": "sh-blind"}, s.blind || "—")), React.createElement("div", {"className": "sh-meta"}, React.createElement("span", null, s.handCount, "hands"), React.createElement("span", null, fmtDur(s.duration)), React.createElement("span", {"className": "sh-date"}, new Date(s.date).toLocaleDateString())))
+          )))))
   );
 }
 
@@ -2596,88 +2004,28 @@ function PlayerObserverModal({ playerDB, setPlayerDB, rooms, selected, onSelect,
     const q = normalizeName(search);
     const filtered = q ? players.filter((p) => normalizeName(p.name).includes(q)) : players;
     return (
-      <div className="modal-bg" onClick={(e) => { if (e.target === e.currentTarget) onClose(); }}>
-        <div className="modal modal-wide" style={{ display: "flex", flexDirection: "column", maxHeight: "85vh" }}>
-          <div className="modal-head">
-            <h3>PLAYER OBSERVER</h3>
-            <button className="modal-close" onClick={onClose}><X size={14}/></button>
-          </div>
-          <div className="po-search-bar">
-            <input className="ss-input" placeholder="🔍 Rechercher..."
-              value={search} onChange={(e) => setSearch(e.target.value)}/>
-          </div>
-          <div className="modal-body" style={{ flex: 1, overflowY: "auto", overscrollBehavior: "contain", paddingBottom: 8 }}>
-            {filtered.length === 0 && <p className="opt-hint">{q ? "Aucun résultat." : "Aucun joueur en base."}</p>}
-            {filtered.map((p) => (
-              <div key={p.id} className="po-player-row">
-                {confirmDeleteId === p.id ? (
-                  <div className="po-confirm-row">
-                    <span className="po-confirm-text">Supprimer {p.name} ?</span>
-                    <button className="act act-danger" onClick={() => {
+      React.createElement("div", {"className": "modal-bg", "onClick": (e) => { if (e.target === e.currentTarget) onClose(); }}, React.createElement("div", {"className": "modal modal-wide", "style": { display: "flex", flexDirection: "column", maxHeight: "85vh" }}, React.createElement("div", {"className": "modal-head"}, React.createElement("h3", null, "PLAYER OBSERVER"), React.createElement("button", {"className": "modal-close", "onClick": onClose}, React.createElement(X, {"size": 14}))), React.createElement("div", {"className": "po-search-bar"}, React.createElement("input", {"className": "ss-input", "placeholder": "🔍 Rechercher...", "value": search, "onChange": (e) => setSearch(e.target.value)})), React.createElement("div", {"className": "modal-body", "style": { flex: 1, overflowY: "auto", overscrollBehavior: "contain", paddingBottom: 8 }}, filtered.length === 0 && React.createElement("p", {"className": "opt-hint"}, q ? "Aucun résultat." : "Aucun joueur en base."), filtered.map((p) => (
+              React.createElement("div", {"key": p.id, "className": "po-player-row"}, confirmDeleteId === p.id ? (
+                  React.createElement("div", {"className": "po-confirm-row"}, React.createElement("span", {"className": "po-confirm-text"}, "Supprimer", p.name, "?"), React.createElement("button", {"className": "act act-danger", "onClick": () => {
                       setPlayerDB((prev) => prev.filter(pp => pp.id !== p.id));
                       setConfirmDeleteId(null);
-                    }}>SUPPRIMER</button>
-                    <button className="act act-neutral" onClick={() => setConfirmDeleteId(null)}>ANNULER</button>
-                  </div>
+                    }}, "SUPPRIMER"), React.createElement("button", {"className": "act act-neutral", "onClick": () => setConfirmDeleteId(null)}, "ANNULER"))
                 ) : editingId === p.id ? (
-                  <div className="po-edit-row">
-                    <input className="ss-input ss-input-sm" value={editName}
-                      onChange={(e) => setEditName(e.target.value)}/>
-                    <select className="ss-select" value={editRoom}
-                      onChange={(e) => setEditRoom(e.target.value)}>
-                      <option value="">—</option>
-                      {rooms.map(r => <option key={r} value={r}>{r}</option>)}
-                    </select>
-                    <button className="ss-add-btn" onClick={() => {
+                  React.createElement("div", {"className": "po-edit-row"}, React.createElement("input", {"className": "ss-input ss-input-sm", "value": editName, "onChange": (e) => setEditName(e.target.value)}), React.createElement("select", {"className": "ss-select", "value": editRoom, "onChange": (e) => setEditRoom(e.target.value)}, React.createElement("option", {"value": ""}, "—"), rooms.map(r => React.createElement("option", {"key": r, "value": r}, r))), React.createElement("button", {"className": "ss-add-btn", "onClick": () => {
                       const nn = normalizeName(editName);
                       setPlayerDB((prev) => prev.map((pp) =>
                         pp.id === p.id ? { ...pp, name: nn || pp.name, room: editRoom } : pp
                       ));
                       setEditingId(null);
-                    }}>✓</button>
-                    <button className="ss-add-btn" onClick={() => setEditingId(null)}>✕</button>
-                  </div>
+                    }}, "✓"), React.createElement("button", {"className": "ss-add-btn", "onClick": () => setEditingId(null)}, "✕"))
                 ) : (
-                  <>
-                    <button className="po-player-btn" onClick={() => onSelect(p)}>
-                      <span className="po-name">{p.name}</span>
-                      <span className="po-room">{p.room || "—"}</span>
-                      <span className="po-hands">{(p.globalStats || emptyStats()).hands}h</span>
-                      <ChevronRight size={12}/>
-                    </button>
-                    <div className="po-actions">
-                      <button className="ss-edit-btn" onClick={() => {
+                  React.createElement(React.Fragment, null, React.createElement("button", {"className": "po-player-btn", "onClick": () => onSelect(p)}, React.createElement("span", {"className": "po-name"}, p.name), React.createElement("span", {"className": "po-room"}, p.room || "—"), React.createElement("span", {"className": "po-hands"}, (p.globalStats || emptyStats()).hands, "h"), React.createElement(ChevronRight, {"size": 12})), React.createElement("div", {"className": "po-actions"}, React.createElement("button", {"className": "ss-edit-btn", "onClick": () => {
                         setEditingId(p.id);
                         setEditName(p.name);
                         setEditRoom(p.room || "");
-                      }}>✎</button>
-                      <button className="ss-del-btn" onClick={() => setConfirmDeleteId(p.id)}>
-                        <Trash2 size={10}/>
-                      </button>
-                    </div>
-                  </>
-                )}
-              </div>
-            ))}
-          </div>
-
-          {/* Fixed add section at bottom */}
-          <div className="po-add-fixed">
-            {addMsg && <p className="po-add-msg">{addMsg}</p>}
-            <div className="po-add-row">
-              <input className="ss-input" placeholder="Nom ou noms séparés par ,"
-                value={newName} onChange={(e) => setNewName(e.target.value)}
-                onKeyDown={(e) => e.key === "Enter" && addPlayers()}/>
-              <select className="ss-select" value={newRoom}
-                onChange={(e) => setNewRoom(e.target.value)}>
-                <option value="">Room —</option>
-                {rooms.map(r => <option key={r} value={r}>{r}</option>)}
-              </select>
-              <button className="ss-add-btn" onClick={addPlayers}><Plus size={12}/></button>
-            </div>
-          </div>
-        </div>
-      </div>
+                      }}, "✎"), React.createElement("button", {"className": "ss-del-btn", "onClick": () => setConfirmDeleteId(p.id)}, React.createElement(Trash2, {"size": 10}))))
+                ))
+            ))), React.createElement("div", {"className": "po-add-fixed"}, addMsg && React.createElement("p", {"className": "po-add-msg"}, addMsg), React.createElement("div", {"className": "po-add-row"}, React.createElement("input", {"className": "ss-input", "placeholder": "Nom ou noms séparés par ,", "value": newName, "onChange": (e) => setNewName(e.target.value), "onKeyDown": (e) => e.key === "Enter" && addPlayers()}), React.createElement("select", {"className": "ss-select", "value": newRoom, "onChange": (e) => setNewRoom(e.target.value)}, React.createElement("option", {"value": ""}, "Room —"), rooms.map(r => React.createElement("option", {"key": r, "value": r}, r))), React.createElement("button", {"className": "ss-add-btn", "onClick": addPlayers}, React.createElement(Plus, {"size": 12}))))))
     );
   }
 
@@ -2686,40 +2034,13 @@ function PlayerObserverModal({ playerDB, setPlayerDB, rooms, selected, onSelect,
   const stats = viewMode === "global" ? (p.globalStats || emptyStats()) : (p.sessionStats || emptyStats());
 
   return (
-    <div className="modal-bg" onClick={(e) => { if (e.target === e.currentTarget) onClose(); }}>
-      <div className="modal modal-wide">
-        <div className="modal-head">
-          <button className="modal-back" onClick={() => onSelect("_list")}>← BACK</button>
-          <h3>{p.name}</h3>
-          <button className="modal-close" onClick={onClose}><X size={14}/></button>
-        </div>
-        <div className="modal-body" style={{ maxHeight: "70vh", overflowY: "auto" }}>
-          <div className="po-toggle">
-            <button className={`tog ${viewMode === "session" ? "on" : ""}`}
-              onClick={() => setViewMode("session")}>SESSION</button>
-            <button className={`tog ${viewMode === "global" ? "on" : ""}`}
-              onClick={() => setViewMode("global")}>GLOBAL</button>
-          </div>
-          <div className="po-meta">
-            <span>Room: {p.room || "—"}</span>
-            <span>Hands: {stats.hands}</span>
-          </div>
-          <div className="po-stats-grid">
-            {STAT_KEYS.map((k) => {
+    React.createElement("div", {"className": "modal-bg", "onClick": (e) => { if (e.target === e.currentTarget) onClose(); }}, React.createElement("div", {"className": "modal modal-wide"}, React.createElement("div", {"className": "modal-head"}, React.createElement("button", {"className": "modal-back", "onClick": () => onSelect("_list")}, "← BACK"), React.createElement("h3", null, p.name), React.createElement("button", {"className": "modal-close", "onClick": onClose}, React.createElement(X, {"size": 14}))), React.createElement("div", {"className": "modal-body", "style": { maxHeight: "70vh", overflowY: "auto" }}, React.createElement("div", {"className": "po-toggle"}, React.createElement("button", {"className": `tog ${viewMode === "session" ? "on" : ""}`, "onClick": () => setViewMode("session")}, "SESSION"), React.createElement("button", {"className": `tog ${viewMode === "global" ? "on" : ""}`, "onClick": () => setViewMode("global")}, "GLOBAL")), React.createElement("div", {"className": "po-meta"}, React.createElement("span", null, "Room:", p.room || "—"), React.createElement("span", null, "Hands:", stats.hands)), React.createElement("div", {"className": "po-stats-grid"}, STAT_KEYS.map((k) => {
               const s = stats[k] || { opp: 0, act: 0 };
               const v = pct(s.opp, s.act);
               return (
-                <div key={k} className="po-stat">
-                  <span className="po-stat-label">{STAT_LABELS[k] || k}</span>
-                  <span className="po-stat-val" style={{ color: statColor(v, k) }}>{fmt(v)}</span>
-                  <span className="po-stat-frac">{s.act}/{s.opp}</span>
-                </div>
+                React.createElement("div", {"key": k, "className": "po-stat"}, React.createElement("span", {"className": "po-stat-label"}, STAT_LABELS[k] || k), React.createElement("span", {"className": "po-stat-val", "style": { color: statColor(v, k) }}, fmt(v)), React.createElement("span", {"className": "po-stat-frac"}, s.act, "/", s.opp))
               );
-            })}
-          </div>
-        </div>
-      </div>
-    </div>
+            })))))
   );
 }
 
