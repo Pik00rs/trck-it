@@ -1,0 +1,4583 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, maximum-scale=1.0">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="theme-color" content="#05060a">
+<meta name="mobile-web-app-capable" content="yes">
+<title>TRCK.iT.</title>
+<link rel="apple-touch-icon" href="icon.svg">
+<link rel="manifest" href="manifest.json">
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body, #root { height: 100%; width: 100%; overflow-x: hidden; }
+  body { background: #05060a; }
+  #loading { display:flex; align-items:center; justify-content:center; height:100vh; color:#00f5ff; font-family:monospace; font-size:14px; letter-spacing:0.2em; }
+</style>
+</head>
+<body>
+<div id="root"><div id="loading">TRCK.iT. loading...</div></div>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/react/18.3.1/umd/react.production.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.3.1/umd/react-dom.production.min.js"></script>
+<script>
+(function(){
+  const h = React.createElement;
+  function icon(paths,vb){vb=vb||"0 0 24 24";return function(props){const{size=24,color="currentColor",...rest}=props||{};return h("svg",{xmlns:"http://www.w3.org/2000/svg",width:size,height:size,viewBox:vb,fill:"none",stroke:color,strokeWidth:2,strokeLinecap:"round",strokeLinejoin:"round",...rest},...paths.map(function(d,i){return h("path",{key:i,d:d});}));};}
+  function iconL(lines,vb){vb=vb||"0 0 24 24";return function(props){const{size=24,color="currentColor",...rest}=props||{};return h("svg",{xmlns:"http://www.w3.org/2000/svg",width:size,height:size,viewBox:vb,fill:"none",stroke:color,strokeWidth:2,strokeLinecap:"round",strokeLinejoin:"round",...rest},...lines);};}
+  window.lucideReact={
+    Trash2:iconL([h("polyline",{key:0,points:"3 6 5 6 21 6"}),h("path",{key:1,d:"M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"}),h("line",{key:2,x1:"10",y1:"11",x2:"10",y2:"17"}),h("line",{key:3,x1:"14",y1:"11",x2:"14",y2:"17"})]),
+    Undo2:icon(["M9 14 4 9l5-5","M4 9h10.5a5.5 5.5 0 0 1 0 11H11"]),
+    ChevronRight:icon(["M9 18l6-6-6-6"]),
+    Settings:iconL([h("circle",{key:0,cx:"12",cy:"12",r:"3"}),h("path",{key:1,d:"M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"})]),
+    X:icon(["M18 6 6 18","M6 6l12 12"]),
+    Plus:icon(["M12 5v14","M5 12h14"]),
+    RotateCcw:icon(["M1 4v6h6","M3.51 15a9 9 0 1 0 2.13-9.36L1 10"]),
+    ArrowUpDown:icon(["M7 15l5 5 5-5","M7 9l5-5 5 5"]),
+    RefreshCw:icon(["M23 4v6h-6","M1 20v-6h6","M3.51 9a9 9 0 0 1 14.85-3.36L23 10","M20.49 15a9 9 0 0 1-14.85 3.36L1 14"]),
+  };
+})();
+</script>
+<script>
+const { useState, useEffect, useMemo, useRef } = React;
+const { Trash2, Undo2, ChevronRight, Settings, X, Plus, RotateCcw, ArrowUpDown, RefreshCw } = window.lucideReact;
+
+/* ============================================================================
+   TRCK.iT. — preflop tracker (cyberpunk minimaliste)
+   ============================================================================
+   Sections:
+   1. CONSTANTS
+   2. STORAGE (localStorage helpers)
+   3. STATS HELPERS
+   4. POSITIONS / ORDER
+   5. HAND STATE / DECISION TREE / APPLY ACTION
+   6. ROOT APP COMPONENT
+   7. SUB-COMPONENTS (PlayerRow, NameModal, Modals, StatsTable)
+   8. STYLES
+   ============================================================================ */
+
+/* =============================================================================
+   1. CONSTANTS
+   ========================================================================== */
+
+// New position scheme: BU / CO / HJ / MP / U2 / U1 / U0 / U-1 ... + SB + BB
+// We start from BU and walk backward for HJ, CO, MP, U2, U1, U0, U-1...
+// SB and BB always come right after BU.
+function buildPositions(activeCount) {
+  // activeCount = number of seated, non-empty players
+  // Returns ordered list of position labels for activeCount players,
+  // listing from BU forward: [BU, SB, BB, then back to UTG-most through CO]
+  // Easier: define the full sorted-from-BU-backward list (most "advanced" position first)
+  if (activeCount === 2) return ["BU/SB", "BB"];
+  if (activeCount === 3) return ["BU", "SB", "BB"];
+  // For >= 4: positions in order UTG-most → BU + SB + BB
+  // We use the user-specified labels:
+  //   BU CO HJ MP U2 U1 U0 U-1
+  // Going backward from BU:
+  const backward = ["BU", "CO", "HJ", "MP", "U2", "U1", "U0", "U-1"];
+  // Need (activeCount - 2) positions for the "in front of BU" group (excludes SB/BB)
+  const beforeBlinds = activeCount - 2;
+  const slice = backward.slice(0, beforeBlinds).reverse(); // UTG-most first → ...CO BU
+  return [...slice, "SB", "BB"]; // canonical preflop order: UTG-most → BB
+}
+
+const ACTION_LABELS = {
+  fold: "FOLD",
+  limp: "LIMP",
+  call: "CALL",
+  check: "CHECK",
+  open: "RFI",
+  iso: "ISO",
+  "3bet": "3-BET",
+  "4bet": "4-BET",
+  "5bet": "5-BET",
+  "6bet": "6-BET+",
+  sqz: "SQZ",
+  win: "WIN",
+};
+
+const STORAGE_KEYS = {
+  players: "rangelive.players",
+  seats: "rangelive.seats",
+  btnSeatIdx: "rangelive.btn",
+  tableSize: "rangelive.tableSize",
+  options: "rangelive.options",
+  history: "rangelive.history",
+  randomPlayers: "rangelive.random",
+  session: "rangelive.session",
+  rooms: "rangelive.rooms",
+  blinds: "rangelive.blinds",
+  sessionHistory: "rangelive.sessionHistory",
+  sessionHandLog: "rangelive.sessionHandLog",
+};
+
+const DEFAULT_ROOMS = ["Casino A", "Casino B", "Home Game"];
+const DEFAULT_BLINDS = ["1/2", "1/3", "2/5", "5/10", "10/20", "25/50"];
+
+/* =============================================================================
+   2. STORAGE
+   ========================================================================== */
+
+function loadJSON(key, fallback) {
+  try {
+    const raw = localStorage.getItem(key);
+    if (!raw) return fallback;
+    return JSON.parse(raw);
+  } catch { return fallback; }
+}
+function saveJSON(key, value) {
+  try { localStorage.setItem(key, JSON.stringify(value)); } catch {}
+}
+
+/* =============================================================================
+   3. STATS HELPERS
+   ========================================================================== */
+
+// Normalize player name: uppercase, remove accents
+function normalizeName(name) {
+  return name.trim()
+    .normalize("NFD").replace(/[\u0300-\u036f]/g, "")
+    .toUpperCase();
+}
+
+// All stat keys: each is { opp: count, act: count }
+const STAT_KEYS = [
+  "vpip", "pfr",
+  "limp", "limpFold", "limpCall", "limpRaise",
+  "rfi", "rfiFold", "rfiCall", "rfi4b",
+  "iso", "isoFold", "isoCall", "isoRaise",
+  "ovl",
+  "flat", "threeBet",
+  "threeBetFold", "threeBetCall", "threeBet5b",
+  "fourBet", "fourBetFold", "fourBetCall", "fourBetRaise",
+  "flatMw", "sqz",
+  "sqzFold", "sqzCall", "sqz5b",
+  "coldCall", "cold4b",
+  "postCheck", "postRaise", "postXFold", "postXCall", "postXRaise",
+];
+
+const emptyStats = () => {
+  const s = { hands: 0, byPos: {} };
+  STAT_KEYS.forEach((k) => { s[k] = { opp: 0, act: 0 }; });
+  return s;
+};
+
+const STAT_LABELS = {
+  vpip: "VPIP", pfr: "PFR",
+  limp: "LIMP", limpFold: "LIMP_F", limpCall: "LIMP_C", limpRaise: "LIMP_R",
+  rfi: "RFI", rfiFold: "RFI_F", rfiCall: "RFI_C", rfi4b: "RFI_R",
+  iso: "ISO", isoFold: "ISO_F", isoCall: "ISO_C", isoRaise: "ISO_R",
+  ovl: "OVL",
+  flat: "FLAT", threeBet: "3B",
+  threeBetFold: "3B_F", threeBetCall: "3B_C", threeBet5b: "3B_R",
+  fourBet: "4B", fourBetFold: "4B_F", fourBetCall: "4B_C", fourBetRaise: "4B_R",
+  flatMw: "FLAT_MW", sqz: "SQZ",
+  sqzFold: "SQZ_F", sqzCall: "SQZ_C", sqz5b: "SQZ_R",
+  coldCall: "CC_3B", cold4b: "C4B",
+  postCheck: "POST_X", postRaise: "POST_R", postXFold: "POST_XF", postXCall: "POST_XC", postXRaise: "POST_XR",
+};
+
+const pct = (o, a) => (o === 0 ? null : Math.round((a / o) * 100));
+const fmt = (v) => (v === null ? "—" : `${v}`);
+
+// Normalize player name: uppercase, strip accents
+function normalizeName(name) {
+  return name.trim()
+    .normalize("NFD").replace(/[\u0300-\u036f]/g, "")
+    .toUpperCase();
+}
+
+const statColor = (value, kind) => {
+  if (value === null) return "var(--dim)";
+  // Tight / standard / loose / maniac thresholds
+  const ranges = {
+    vpip: [18, 28, 40], pfr: [12, 22, 30],
+    limp: [5, 15, 25], rfi: [12, 22, 30],
+    flat: [8, 16, 25], threeBet: [4, 8, 12], sqz: [3, 7, 12],
+    flatMw: [8, 16, 25],
+  };
+  const r = ranges[kind] || [20, 40, 60];
+  if (value < r[0]) return "var(--cy-cyan)";
+  if (value < r[1]) return "var(--cy-green)";
+  if (value < r[2]) return "var(--cy-yellow)";
+  return "var(--cy-pink)";
+};
+
+function mergeStats(a, b) {
+  const out = emptyStats();
+  out.hands = (a.hands || 0) + (b.hands || 0);
+  STAT_KEYS.forEach((k) => {
+    const ak = a[k] || { opp: 0, act: 0 };
+    const bk = b[k] || { opp: 0, act: 0 };
+    out[k] = { opp: ak.opp + bk.opp, act: ak.act + bk.act };
+  });
+  // Merge byPos
+  const aPos = a.byPos || {};
+  const bPos = b.byPos || {};
+  const allPositions = new Set([...Object.keys(aPos), ...Object.keys(bPos)]);
+  allPositions.forEach((pos) => {
+    const ap = aPos[pos] || { hands: 0 };
+    const bp = bPos[pos] || { hands: 0 };
+    const merged = { hands: (ap.hands || 0) + (bp.hands || 0) };
+    STAT_KEYS.forEach((k) => {
+      const apk = ap[k] || { opp: 0, act: 0 };
+      const bpk = bp[k] || { opp: 0, act: 0 };
+      const mk = { opp: apk.opp + bpk.opp, act: apk.act + bpk.act };
+      const sds = [...(apk.showdowns || []), ...(bpk.showdowns || [])];
+      if (sds.length > 0) mk.showdowns = sds;
+      merged[k] = mk;
+    });
+    out.byPos[pos] = merged;
+  });
+  return out;
+}
+
+/* =============================================================================
+   4. POSITIONS / ACTION ORDER
+   ========================================================================== */
+
+/**
+ * Given the seats array and BTN index, compute:
+ *  - position label for each seat (or null if seat is empty)
+ *  - the action order (array of seat indexes, starting with first to act preflop)
+ *
+ * Rules:
+ *  - Empty seats are skipped (positions recalculated).
+ *  - BU always sits at btnSeatIdx (or, if that seat is empty, the next non-empty
+ *    seat clockwise becomes the BU).
+ *  - Heads-up: BU/SB then BB.
+ *  - 3-handed: BU, SB, BB.
+ *  - 4+: UTG-most ... CO, BU, SB, BB. With straddle, BTN+3 is the straddler
+ *    and acts last preflop with the option to raise.
+ */
+function computeLayout(seats, btnSeatIdx, options) {
+  const n = seats.length;
+  // Find the actual BU seat (first playable starting at btnSeatIdx)
+  let buSeat = -1;
+  for (let i = 0; i < n; i++) {
+    const idx = (btnSeatIdx + i) % n;
+    if (isSeatPlayable(seats[idx]) && seats[idx].playerId !== null) { buSeat = idx; break; }
+  }
+  if (buSeat === -1) return { positions: seats.map(() => null), order: [], buSeat: -1 };
+
+  // Active seats clockwise starting from BU (playable only)
+  const active = [];
+  for (let i = 0; i < n; i++) {
+    const idx = (buSeat + i) % n;
+    if (isSeatPlayable(seats[idx]) && seats[idx].playerId !== null) active.push(idx);
+  }
+  const activeCount = active.length;
+
+  // Position labels (from BU forward)
+  // active[0] = BU, active[1] = SB, active[2] = BB, active[3] = UTG-most...
+  const posLabels = buildPositions(activeCount);
+  // posLabels is in canonical preflop order: UTG-most first ... BB last
+  // Map: active[k] for k = activeCount - 1 down to 3 maps to positions UTG-most→CO
+  // We need to assign labels to active[]: active[0]=BU, active[1]=SB, active[2]=BB,
+  // active[3..activeCount-1] = CO, HJ, MP, U2, U1, U0, U-1 (going backward in clockwise)
+  // Equivalently: active[k] for k>=1 corresponds to positions[(activeCount - k) % activeCount? Not quite].
+  // Let's just walk the canonical order and match.
+
+  // canonical preflop order: UTG-most ... CO, BU, SB, BB
+  // canonical[0..activeCount-3] = positions in front of BU (UTG-most → CO)
+  // canonical[activeCount-3] = BU, canonical[activeCount-2] = SB, canonical[activeCount-1] = BB
+  // For 2P: canonical = [BU/SB, BB]
+  // For 3P: canonical = [BU, SB, BB]
+  // For 4P: canonical = [CO, BU, SB, BB]
+  // ...
+  // active = [BU, SB, BB, UTG-most-furthest-from-BU, ..., CO (closest to BU)]
+  // The seat at active[3 + j] for j=0..activeCount-4 corresponds to canonical[activeCount-4-j]
+  // (i.e., active[3]=UTG-most=canonical[0], active[4]=canonical[1], ..., active[activeCount-1]=CO=canonical[activeCount-4])
+
+  const positions = new Array(n).fill(null);
+  if (activeCount === 2) {
+    positions[active[0]] = "BU/SB";
+    positions[active[1]] = "BB";
+  } else if (activeCount === 3) {
+    positions[active[0]] = "BU";
+    positions[active[1]] = "SB";
+    positions[active[2]] = "BB";
+  } else {
+    positions[active[0]] = "BU";
+    positions[active[1]] = "SB";
+    positions[active[2]] = "BB";
+    // active[3..activeCount-1] = UTG-most, then closer to BU as index grows
+    for (let k = 3; k < activeCount; k++) {
+      const canonicalIdx = activeCount - 1 - k + (activeCount - 3); // = 2*activeCount - 4 - k
+      // Simpler: position labels in front of BU, going clockwise away from BU:
+      // active[3] = UTG-most, active[4] = next-utg, ..., active[activeCount-1] = CO
+      // Labels going from UTG-most to CO are: posLabels[0] ... posLabels[activeCount-4]
+      // But active[3] = UTG-most = posLabels[0], active[4] = posLabels[1], ...
+      positions[active[k]] = posLabels[k - 3];
+    }
+  }
+
+  // Action order: preflop = first to act after BB, going clockwise, ending with BB
+  // Preflop action order: UTG-most → ... → CO → BU → SB → BB
+  // active[0]=BU, active[1]=SB, active[2]=BB, active[3..]=UTG-most→CO
+  // So order is: active[3], active[4], ..., active[activeCount-1] (CO), active[0] (BU), active[1] (SB), active[2] (BB)
+  let order;
+  if (activeCount === 2) order = [active[0], active[1]];
+  else if (activeCount === 3) order = [active[0], active[1], active[2]];
+  else {
+    order = [];
+    for (let k = 3; k < activeCount; k++) order.push(active[k]);
+    order.push(active[0]); // BU
+    order.push(active[1]); // SB
+    order.push(active[2]); // BB
+  }
+
+  // STRADDLE: straddler sits at position active[3] (UTG) → acts after BB preflop
+  // Mississippi = straddle from BU (active[0])
+  if (options.straddle && activeCount >= 4) {
+    if (!options.mississippi) {
+      // UTG straddles. New action order: UTG+1, ..., CO, BU, SB, BB, STR(UTG)
+      const utgSeat = active[3];
+      positions[utgSeat] = "STR";
+      order = order.filter((s) => s !== utgSeat);
+      order.push(utgSeat);
+    } else {
+      // Mississippi: BU straddles. Action: SB, BB, UTG, ..., CO, MSP(BU)
+      const buSeatIdx = active[0];
+      positions[buSeatIdx] = "MSP";
+      // Rebuild order: SB first, BB second, then UTG..CO, then MSP(BU) last
+      order = [
+        active[1], // SB
+        active[2], // BB
+      ];
+      for (let k = 3; k < activeCount; k++) order.push(active[k]); // UTG..CO
+      order.push(buSeatIdx); // MSP last
+    }
+  }
+
+  return { positions, order, buSeat, activeCount };
+}
+
+/* =============================================================================
+   5. HAND STATE / DECISION TREE / APPLY ACTION
+   ========================================================================== */
+
+function buildInitialHand(seats, layout, options) {
+  const inHandSeats = new Set(layout.order);
+  // Pre-compute that the initial state has limpers from straddle (treated as a forced bet, not a limp)
+  // We keep raiseCount = 0 (straddle is just a bigger BB for our preflop logic).
+  return {
+    seats: seats.map((s) => s ? { ...s } : null),
+    order: layout.order,
+    positions: layout.positions,
+    buSeat: layout.buSeat,
+    inHand: inHandSeats,
+    raiseCount: 0,
+    lastRaiserSeat: null,
+    callersSinceLastRaise: 0,
+    limpers: 0,
+    events: [],
+    actedSinceLastRaise: new Set(),
+    closed: false,
+    showdownOpen: false,
+    showdownData: {},
+    posts: new Set(), // seatIdx of players who posted (missed BB, paid to return)
+    playerEvents: seats.map((s) => {
+      if (!s) return null;
+      const opp = {}; const act = {};
+      STAT_KEYS.forEach((k) => { opp[k] = false; act[k] = false; });
+      return { dealt: true, opp, act, postChecked: false };
+    }),
+    options,
+  };
+}
+
+function getRemainingQueue(h) {
+  const order = h.order;
+  if (h.raiseCount === 0) {
+    return order.filter((s) => h.inHand.has(s) && !h.actedSinceLastRaise.has(s));
+  }
+  // After a raise, queue starts after the lastRaiser in the order, wraps around
+  const raiserPos = order.indexOf(h.lastRaiserSeat);
+  if (raiserPos === -1) return [];
+  const queue = [];
+  for (let step = 1; step < order.length; step++) {
+    const s = order[(raiserPos + step) % order.length];
+    if (h.inHand.has(s) && !h.actedSinceLastRaise.has(s)) queue.push(s);
+  }
+  return queue;
+}
+
+function isActionClosed(h) {
+  const stillIn = [...h.inHand];
+  if (stillIn.length <= 1) return true;
+  if (h.raiseCount === 0) {
+    for (const s of stillIn) {
+      if (!h.actedSinceLastRaise.has(s)) return false;
+    }
+    return true;
+  }
+  for (const s of stillIn) {
+    if (s === h.lastRaiserSeat) continue;
+    if (!h.actedSinceLastRaise.has(s)) return false;
+  }
+  return true;
+}
+
+function getSituationFor(h, seatIdx) {
+  if (!h.inHand.has(seatIdx)) return null;
+
+  const isPosted = h.posts && h.posts.has(seatIdx);
+  const ev = h.playerEvents[seatIdx];
+  const postHasChecked = ev && ev.postChecked;
+
+  // ── POSTED player (not yet checked) — only relevant BEFORE they've acted ──
+  if (isPosted && !postHasChecked) {
+    const raises = h.raiseCount;
+    // No action before: can CHECK (post is a forced bet, they already paid) or RAISE (RFI)
+    if (raises === 0) {
+      return {
+        actions: [
+          { type: "check", label: "CHECK", tone: "neutral" },
+          { type: "open", label: "RFI", tone: "accent" },
+        ],
+      };
+    }
+    // 1 raise: FOLD / CALL / 3B (treated as normal raise)
+    if (raises === 1 && h.callersSinceLastRaise === 0) {
+      return {
+        actions: [
+          { type: "fold", label: "FOLD", tone: "mute" },
+          { type: "call", label: "CALL", tone: "neutral" },
+          { type: "3bet", label: "3-BET", tone: "accent" },
+        ],
+      };
+    }
+    if (raises === 1 && h.callersSinceLastRaise >= 1) {
+      return {
+        actions: [
+          { type: "fold", label: "FOLD", tone: "mute" },
+          { type: "call", label: "CALL", tone: "neutral" },
+          { type: "sqz", label: "SQZ", tone: "accent" },
+        ],
+      };
+    }
+    // 2+ raises: FOLD / CALL / 4B
+    if (raises === 2) {
+      return {
+        actions: [
+          { type: "fold", label: "FOLD", tone: "mute" },
+          { type: "call", label: "CALL", tone: "neutral" },
+          { type: "4bet", label: "4-BET", tone: "accent" },
+        ],
+      };
+    }
+  }
+
+  // ── POSTED player who has CHECKED, now facing iso ──
+  if (isPosted && postHasChecked) {
+    const raises = h.raiseCount;
+    if (raises === 1 && h.callersSinceLastRaise === 0) {
+      return {
+        actions: [
+          { type: "postXFold", label: "FOLD", tone: "mute" },
+          { type: "postXCall", label: "CALL", tone: "neutral" },
+          { type: "postXRaise", label: "3-BET", tone: "accent" },
+        ],
+      };
+    }
+    if (raises === 1 && h.callersSinceLastRaise >= 1) {
+      return {
+        actions: [
+          { type: "postXFold", label: "FOLD", tone: "mute" },
+          { type: "postXCall", label: "CALL", tone: "neutral" },
+          { type: "postXRaise", label: "SQZ", tone: "accent" },
+        ],
+      };
+    }
+  }
+
+  // Detect if this is the "big blind" or straddler (last to act preflop = last in order)
+  const isLastToAct = seatIdx === h.order[h.order.length - 1];
+  const raises = h.raiseCount;
+  const callers = h.callersSinceLastRaise;
+
+  // ── LAST TO ACT (BB or straddler) special cases ──
+  if (isLastToAct) {
+    // Nobody did anything before → everyone folded to BB/straddler → WIN
+    if (raises === 0 && h.limpers === 0) {
+      return {
+        actions: [
+          { type: "win", label: "WIN", tone: "accent" },
+        ],
+      };
+    }
+    // Limps only → can CHECK or ISO (raise)
+    if (raises === 0 && h.limpers > 0) {
+      return {
+        actions: [
+          { type: "check", label: "CHECK", tone: "neutral" },
+          { type: "iso", label: "ISO", tone: "accent" },
+        ],
+      };
+    }
+    // 1 raise, no caller → FOLD / CALL / 3B
+    if (raises === 1 && callers === 0) {
+      return {
+        actions: [
+          { type: "fold", label: "FOLD", tone: "mute" },
+          { type: "call", label: "CALL", tone: "neutral" },
+          { type: "3bet", label: "3-BET", tone: "accent" },
+        ],
+      };
+    }
+    // 1 raise + caller(s) → FOLD / CALL / SQZ
+    if (raises === 1 && callers >= 1) {
+      return {
+        actions: [
+          { type: "fold", label: "FOLD", tone: "mute" },
+          { type: "call", label: "CALL", tone: "neutral" },
+          { type: "sqz", label: "SQZ", tone: "accent" },
+        ],
+      };
+    }
+    // falls through to generic raise handling below
+  }
+
+  // ── GENERIC (non-BB or BB facing 2+ raises) ──
+  if (raises === 0 && h.limpers === 0) {
+    return {
+      actions: [
+        { type: "fold", label: "FOLD", tone: "mute" },
+        { type: "call", label: "LIMP", tone: "neutral" },
+        { type: "open", label: "RFI", tone: "accent" },
+      ],
+    };
+  }
+  if (raises === 0 && h.limpers > 0) {
+    return {
+      actions: [
+        { type: "fold", label: "FOLD", tone: "mute" },
+        { type: "call", label: "LIMP", tone: "neutral" },
+        { type: "iso", label: "ISO", tone: "accent" },
+      ],
+    };
+  }
+  if (raises === 1 && callers === 0) {
+    return {
+      actions: [
+        { type: "fold", label: "FOLD", tone: "mute" },
+        { type: "call", label: "CALL", tone: "neutral" },
+        { type: "3bet", label: "3-BET", tone: "accent" },
+      ],
+    };
+  }
+  if (raises === 1 && callers >= 1) {
+    return {
+      actions: [
+        { type: "fold", label: "FOLD", tone: "mute" },
+        { type: "call", label: "CALL", tone: "neutral" },
+        { type: "sqz", label: "SQZ", tone: "accent" },
+      ],
+    };
+  }
+  if (raises === 2) {
+    return {
+      actions: [
+        { type: "fold", label: "FOLD", tone: "mute" },
+        { type: "call", label: "CALL", tone: "neutral" },
+        { type: "4bet", label: "4-BET", tone: "accent" },
+      ],
+    };
+  }
+  if (raises === 3) {
+    return {
+      actions: [
+        { type: "fold", label: "FOLD", tone: "mute" },
+        { type: "call", label: "CALL", tone: "neutral" },
+        { type: "5bet", label: "5-BET", tone: "accent" },
+      ],
+    };
+  }
+  if (raises === 4) {
+    return {
+      actions: [
+        { type: "fold", label: "FOLD", tone: "mute" },
+        { type: "call", label: "CALL", tone: "neutral" },
+        { type: "6bet", label: "6-BET+", tone: "accent" },
+      ],
+    };
+  }
+  return {
+    actions: [
+      { type: "fold", label: "FOLD", tone: "mute" },
+      { type: "call", label: "CALL", tone: "neutral" },
+      { type: "6bet", label: "JAM", tone: "accent" },
+    ],
+  };
+}
+
+function applyAction(h, seatIdx, type) {
+  const next = {
+    ...h,
+    inHand: new Set(h.inHand),
+    actedSinceLastRaise: new Set(h.actedSinceLastRaise),
+    events: [...h.events],
+    playerEvents: h.playerEvents.map((e) => e ? {
+      dealt: e.dealt,
+      opp: { ...e.opp },
+      act: { ...e.act },
+    } : null),
+  };
+
+  const queue = getRemainingQueue(h);
+  const targetPos = queue.indexOf(seatIdx);
+  if (targetPos === -1) return h;
+
+  const setOpp = (ev, state) => {
+    ev.opp.vpip = true;
+    ev.opp.pfr = true;
+    if (state.raiseCount === 0) {
+      ev.opp.limp = true;
+      if (state.limpers === 0) {
+        ev.opp.rfi = true;
+      } else {
+        ev.opp.iso = true;
+        ev.opp.ovl = true; // can also overlimp
+      }
+    }
+    if (state.raiseCount === 1 && state.callersSinceLastRaise === 0) {
+      ev.opp.flat = true;
+      ev.opp.threeBet = true;
+    }
+    if (state.raiseCount === 1 && state.callersSinceLastRaise >= 1) {
+      ev.opp.flatMw = true;
+      ev.opp.sqz = true;
+    }
+    // Cold call / cold 4b: facing a 3bet without having acted before
+    if (state.raiseCount === 2) {
+      const hasActedBefore = ev.act.limp || ev.act.rfi || ev.act.iso || ev.act.flat || ev.act.flatMw
+        || ev.act.threeBet || ev.act.sqz;
+      if (!hasActedBefore) {
+        ev.opp.coldCall = true;
+        ev.opp.cold4b = true;
+      }
+    }
+  };
+
+  // Auto-fold every player BEFORE target in queue
+  for (let i = 0; i < targetPos; i++) {
+    const s = queue[i];
+    const ev = next.playerEvents[s];
+    if (!ev) continue;
+    setOpp(ev, h);
+    next.events.push({ who: s, kind: "fold" });
+    next.inHand.delete(s);
+    next.actedSinceLastRaise.add(s);
+  }
+
+  const ev = next.playerEvents[seatIdx];
+
+  // SPECIAL: "win" = BB/straddler wins without action
+  if (type === "win") {
+    next.events.push({ who: seatIdx, kind: "win" });
+    next.actedSinceLastRaise.add(seatIdx);
+    next.closed = true;
+    return next;
+  }
+
+  // Set opportunities for the acting player
+  setOpp(ev, h);
+
+  switch (type) {
+    case "fold":
+      next.events.push({ who: seatIdx, kind: "fold" });
+      next.inHand.delete(seatIdx);
+      next.actedSinceLastRaise.add(seatIdx);
+      _resolvePhase2Fold(ev, h);
+      break;
+    case "check":
+      next.events.push({ who: seatIdx, kind: "check" });
+      next.actedSinceLastRaise.add(seatIdx);
+      if (next.posts && next.posts.has(seatIdx)) {
+        ev.opp.postCheck = true;
+        ev.act.postCheck = true;
+        ev.opp.postRaise = true; // had opportunity to raise but chose check
+        ev.postChecked = true;
+      }
+      break;
+    case "postXFold":
+      next.events.push({ who: seatIdx, kind: "fold" });
+      ev.opp.postXFold = true;
+      ev.act.postXFold = true;
+      next.inHand.delete(seatIdx);
+      next.actedSinceLastRaise.add(seatIdx);
+      break;
+    case "postXCall":
+      next.events.push({ who: seatIdx, kind: "call" });
+      ev.opp.postXCall = true;
+      ev.act.postXCall = true;
+      ev.act.vpip = true;
+      next.actedSinceLastRaise.add(seatIdx);
+      next.callersSinceLastRaise += 1;
+      break;
+    case "postXRaise":
+      next.events.push({ who: seatIdx, kind: h.callersSinceLastRaise === 0 ? "3bet" : "sqz" });
+      ev.opp.postXRaise = true;
+      ev.act.postXRaise = true;
+      ev.act.vpip = true; ev.act.pfr = true;
+      next.raiseCount = 2;
+      next.lastRaiserSeat = seatIdx;
+      next.callersSinceLastRaise = 0;
+      next.actedSinceLastRaise = new Set([seatIdx]);
+      break;
+    case "call": {
+      const isLimp = h.raiseCount === 0;
+      next.events.push({ who: seatIdx, kind: isLimp ? "limp" : "call" });
+      ev.act.vpip = true;
+      if (isLimp) {
+        ev.act.limp = true;
+        if (h.limpers > 0) ev.act.ovl = true; // overlimp
+        next.limpers += 1;
+      } else {
+        if (!_resolvePhase2Call(ev, h)) {
+          // Check cold call FIRST (before setting flat/flatMw)
+          if (h.raiseCount === 2) {
+            const hadAction = ev.act.limp || ev.act.rfi || ev.act.iso || ev.act.flat || ev.act.flatMw
+              || ev.act.threeBet || ev.act.sqz;
+            if (!hadAction) ev.act.coldCall = true;
+          }
+          if (h.raiseCount === 1) {
+            if (h.callersSinceLastRaise === 0) ev.act.flat = true;
+            else ev.act.flatMw = true;
+          }
+        }
+        next.callersSinceLastRaise += 1;
+      }
+      next.actedSinceLastRaise.add(seatIdx);
+      break;
+    }
+    case "open":
+      next.events.push({ who: seatIdx, kind: "open" });
+      ev.act.vpip = true; ev.act.pfr = true; ev.act.rfi = true;
+      // If posted, also mark postRaise
+      if (next.posts && next.posts.has(seatIdx)) {
+        ev.opp.postRaise = true;
+        ev.act.postRaise = true;
+      }
+      next.raiseCount = 1;
+      next.lastRaiserSeat = seatIdx;
+      next.callersSinceLastRaise = 0;
+      next.actedSinceLastRaise = new Set([seatIdx]);
+      break;
+    case "iso":
+      next.events.push({ who: seatIdx, kind: "iso" });
+      ev.act.vpip = true; ev.act.pfr = true; ev.act.iso = true;
+      if (ev.act.limp) { ev.opp.limpRaise = true; ev.act.limpRaise = true; }
+      if (next.posts && next.posts.has(seatIdx)) {
+        ev.opp.postRaise = true;
+        ev.act.postRaise = true;
+      }
+      next.raiseCount = 1;
+      next.lastRaiserSeat = seatIdx;
+      next.callersSinceLastRaise = 0;
+      next.limpers = 0;
+      next.actedSinceLastRaise = new Set([seatIdx]);
+      break;
+    case "3bet":
+      next.events.push({ who: seatIdx, kind: "3bet" });
+      ev.act.vpip = true; ev.act.pfr = true; ev.act.threeBet = true;
+      next.raiseCount = 2;
+      next.lastRaiserSeat = seatIdx;
+      next.callersSinceLastRaise = 0;
+      next.actedSinceLastRaise = new Set([seatIdx]);
+      _markRaiserFacing3b(next, h);
+      break;
+    case "sqz":
+      next.events.push({ who: seatIdx, kind: "sqz" });
+      ev.act.vpip = true; ev.act.pfr = true; ev.act.sqz = true;
+      next.raiseCount = 2;
+      next.lastRaiserSeat = seatIdx;
+      next.callersSinceLastRaise = 0;
+      next.actedSinceLastRaise = new Set([seatIdx]);
+      _markRaiserFacing3b(next, h);
+      break;
+    case "4bet":
+      next.events.push({ who: seatIdx, kind: "4bet" });
+      ev.act.vpip = true; ev.act.pfr = true;
+      ev.act.fourBet = true;
+      if (ev.act.rfi) { ev.opp.rfi4b = true; ev.act.rfi4b = true; }
+      if (ev.act.iso) { ev.opp.isoRaise = true; ev.act.isoRaise = true; }
+      if (!ev.act.rfi && !ev.act.iso) {
+        const hadAction = ev.act.limp || ev.act.flat || ev.act.flatMw
+          || ev.act.threeBet || ev.act.sqz;
+        if (!hadAction) ev.act.cold4b = true;
+      }
+      next.raiseCount = 3;
+      next.lastRaiserSeat = seatIdx;
+      next.callersSinceLastRaise = 0;
+      next.actedSinceLastRaise = new Set([seatIdx]);
+      _markPrevRaiserFacing4b(next, h);
+      _markFourBetterFacing5b(next, seatIdx);
+      break;
+    case "5bet":
+      next.events.push({ who: seatIdx, kind: "5bet" });
+      ev.act.vpip = true; ev.act.pfr = true;
+      if (ev.act.threeBet) { ev.opp.threeBet5b = true; ev.act.threeBet5b = true; }
+      if (ev.act.sqz) { ev.opp.sqz5b = true; ev.act.sqz5b = true; }
+      if (ev.act.fourBet) { ev.opp.fourBetRaise = true; ev.act.fourBetRaise = true; }
+      next.raiseCount = 4;
+      next.lastRaiserSeat = seatIdx;
+      next.callersSinceLastRaise = 0;
+      next.actedSinceLastRaise = new Set([seatIdx]);
+      _markPrevRaiserFacing5b(next, h);;
+      break;
+    case "6bet":
+      next.events.push({ who: seatIdx, kind: "6bet" });
+      ev.act.vpip = true; ev.act.pfr = true;
+      next.raiseCount = 5;
+      next.lastRaiserSeat = seatIdx;
+      next.callersSinceLastRaise = 0;
+      next.actedSinceLastRaise = new Set([seatIdx]);
+      break;
+  }
+
+  if (isActionClosed(next)) {
+    for (const s of [...next.inHand]) {
+      if (!next.actedSinceLastRaise.has(s) && s !== next.lastRaiserSeat) {
+        const pev = next.playerEvents[s];
+        if (pev) setOpp(pev, next);
+        // Phase 2 auto-fold for players who already acted
+        if (pev) _resolvePhase2Fold(pev, next);
+        next.events.push({ who: s, kind: "fold" });
+        next.inHand.delete(s);
+        next.actedSinceLastRaise.add(s);
+      }
+    }
+    next.closed = true;
+  }
+
+  return next;
+}
+
+function _resolvePhase2Fold(ev, h) {
+  if (ev.act.limp && h.raiseCount >= 1) {
+    ev.opp.limpFold = true; ev.act.limpFold = true;
+  }
+  if (ev.act.rfi && h.raiseCount >= 2) {
+    ev.opp.rfiFold = true; ev.act.rfiFold = true;
+  }
+  if (ev.act.iso && h.raiseCount >= 2) {
+    ev.opp.isoFold = true; ev.act.isoFold = true;
+  }
+  if (ev.act.threeBet && h.raiseCount >= 3) {
+    ev.opp.threeBetFold = true; ev.act.threeBetFold = true;
+  }
+  if (ev.act.sqz && h.raiseCount >= 3) {
+    ev.opp.sqzFold = true; ev.act.sqzFold = true;
+  }
+  if (ev.act.fourBet && h.raiseCount >= 4) {
+    ev.opp.fourBetFold = true; ev.act.fourBetFold = true;
+  }
+}
+
+function _resolvePhase2Call(ev, h) {
+  let resolved = false;
+  if (ev.act.limp && h.raiseCount >= 1) {
+    ev.opp.limpCall = true; ev.act.limpCall = true;
+    resolved = true;
+  }
+  if (ev.act.rfi && h.raiseCount >= 2) {
+    ev.opp.rfiCall = true; ev.act.rfiCall = true;
+    resolved = true;
+  }
+  if (ev.act.iso && h.raiseCount >= 2) {
+    ev.opp.isoCall = true; ev.act.isoCall = true;
+    resolved = true;
+  }
+  if (ev.act.threeBet && h.raiseCount >= 3) {
+    ev.opp.threeBetCall = true; ev.act.threeBetCall = true;
+    resolved = true;
+  }
+  if (ev.act.sqz && h.raiseCount >= 3) {
+    ev.opp.sqzCall = true; ev.act.sqzCall = true;
+    resolved = true;
+  }
+  if (ev.act.fourBet && h.raiseCount >= 4) {
+    ev.opp.fourBetCall = true; ev.act.fourBetCall = true;
+    resolved = true;
+  }
+  return resolved;
+}
+
+function _markFourBetterFacing5b(next, fourBetterSeat) {
+  // Placeholder kept for consistency, no-op
+}
+
+function _markRaiserFacing3b(next, h) {
+  if (h.lastRaiserSeat !== null) {
+    const raiserEv = next.playerEvents[h.lastRaiserSeat];
+    if (raiserEv) {
+      if (raiserEv.act.rfi) {
+        raiserEv.opp.rfiFold = true;
+        raiserEv.opp.rfiCall = true;
+        raiserEv.opp.rfi4b = true;
+      }
+      if (raiserEv.act.iso) {
+        raiserEv.opp.isoFold = true;
+        raiserEv.opp.isoCall = true;
+        raiserEv.opp.isoRaise = true;
+      }
+    }
+  }
+}
+
+function _markPrevRaiserFacing4b(next, h) {
+  if (h.lastRaiserSeat !== null) {
+    const prevEv = next.playerEvents[h.lastRaiserSeat];
+    if (prevEv) {
+      if (prevEv.act.threeBet) {
+        prevEv.opp.threeBetFold = true;
+        prevEv.opp.threeBetCall = true;
+        prevEv.opp.threeBet5b = true;
+      }
+      if (prevEv.act.sqz) {
+        prevEv.opp.sqzFold = true;
+        prevEv.opp.sqzCall = true;
+        prevEv.opp.sqz5b = true;
+      }
+    }
+  }
+}
+
+function _markPrevRaiserFacing5b(next, h) {
+  if (h.lastRaiserSeat !== null) {
+    const prevEv = next.playerEvents[h.lastRaiserSeat];
+    if (prevEv && prevEv.act.fourBet) {
+      prevEv.opp.fourBetFold = true;
+      prevEv.opp.fourBetCall = true;
+      prevEv.opp.fourBetRaise = true;
+    }
+  }
+}
+
+/* =============================================================================
+   6. ROOT APP COMPONENT
+   ========================================================================== */
+
+function App() {
+  // ── Persistent state ──
+  const [tableSize, setTableSize] = useState(() => loadJSON(STORAGE_KEYS.tableSize, 6));
+  const [playerDB, setPlayerDB] = useState(() => loadJSON(STORAGE_KEYS.players, []));
+  const [seats, setSeats] = useState(() => {
+    const initSize = loadJSON(STORAGE_KEYS.tableSize, 6);
+    const stored = loadJSON(STORAGE_KEYS.seats, null);
+    // Validate: right length, Hero present, all seats have playerId
+    const valid = stored
+      && Array.isArray(stored)
+      && stored.length === initSize
+      && stored.some((s) => s && s.isHero)
+      && stored.every((s) => s && typeof s === "object");
+    if (!valid) return makeInitialSeats(initSize);
+    // Migrate: ensure status + stable random IDs
+    const migrated = [];
+    let usedNums = new Set();
+    stored.forEach((s) => {
+      if (s?.playerId && !s.isHero) {
+        const n = randomNumFromId(s.playerId);
+        if (n !== null) usedNums.add(n);
+      }
+    });
+    const nextNum = () => {
+      let i = 1;
+      while (usedNums.has(i)) i++;
+      usedNums.add(i);
+      return i;
+    };
+    stored.forEach((s) => {
+      let pid = s.playerId;
+      if (!pid) {
+        pid = s.isHero ? "hero" : `random_${nextNum()}`;
+      } else if (!s.isHero && isRandomId(pid) && randomNumFromId(pid) === null) {
+        // Stale random id from previous version → re-number
+        pid = `random_${nextNum()}`;
+      }
+      migrated.push({
+        ...s,
+        status: s.status || "active",
+        playerId: pid,
+      });
+    });
+    return migrated;
+  });
+  const [btnSeatIdx, setBtnSeatIdx] = useState(() => loadJSON(STORAGE_KEYS.btnSeatIdx, 0));
+  const [options, setOptions] = useState(() => loadJSON(STORAGE_KEYS.options, {
+    straddle: false, mississippi: false, statsView: "session",
+  }));
+
+  // ── Volatile state ──
+  const [handLog, setHandLog] = useState([]); // array of { seats, btnSeatIdx, hand, playerDB } snapshots
+  const [hand, setHand] = useState(null);
+  const [editingSeat, setEditingSeat] = useState(null);
+  const [showSettings, setShowSettings] = useState(false);
+  const [showShowdown, setShowShowdown] = useState(false);
+  const [reorderMode, setReorderMode] = useState(false);
+  // pendingAssign = { seatIdx, playerId, sessionStats } — waiting for keep/fresh choice
+  const [pendingAssign, setPendingAssign] = useState(null);
+
+  // Stats session-only for Random pseudo players (declared early so it's accessible in effects)
+  const [randomPlayers, setRandomPlayers] = useState(() => loadJSON(STORAGE_KEYS.randomPlayers, {}));
+  useEffect(() => saveJSON(STORAGE_KEYS.randomPlayers, randomPlayers), [randomPlayers]);
+
+  // ── Session / Room / Blind ──
+  const [rooms, setRooms] = useState(() => loadJSON(STORAGE_KEYS.rooms, DEFAULT_ROOMS));
+  const [blindLevels, setBlindLevels] = useState(() => loadJSON(STORAGE_KEYS.blinds, DEFAULT_BLINDS));
+  const [session, setSession] = useState(() => {
+    const stored = loadJSON(STORAGE_KEYS.session, null);
+    if (stored && stored.id) return stored;
+    return { id: 1, room: "", blind: "", startTime: Date.now(), handCount: 0, active: false };
+  });
+  useEffect(() => saveJSON(STORAGE_KEYS.session, session), [session]);
+  useEffect(() => saveJSON(STORAGE_KEYS.rooms, rooms), [rooms]);
+  useEffect(() => saveJSON(STORAGE_KEYS.blinds, blindLevels), [blindLevels]);
+
+  // Timer tick (only when session active)
+  const [elapsed, setElapsed] = useState("00:00");
+  useEffect(() => {
+    if (!session.active) { setElapsed("00:00"); return; }
+    const tick = () => {
+      const diff = Math.floor((Date.now() - session.startTime) / 1000);
+      const h = Math.floor(diff / 3600);
+      const m = Math.floor((diff % 3600) / 60);
+      const s = diff % 60;
+      setElapsed(h > 0
+        ? `${h}:${String(m).padStart(2,"0")}:${String(s).padStart(2,"0")}`
+        : `${String(m).padStart(2,"0")}:${String(s).padStart(2,"0")}`
+      );
+    };
+    tick();
+    const iv = setInterval(tick, 1000);
+    return () => clearInterval(iv);
+  }, [session.startTime, session.active]);
+
+  // ── Session history ──
+  const [sessionHistory, setSessionHistory] = useState(() => loadJSON(STORAGE_KEYS.sessionHistory, []));
+  useEffect(() => saveJSON(STORAGE_KEYS.sessionHistory, sessionHistory), [sessionHistory]);
+
+  const [sessionHandLog, setSessionHandLog] = useState(() => loadJSON(STORAGE_KEYS.sessionHandLog, []));
+  useEffect(() => saveJSON(STORAGE_KEYS.sessionHandLog, sessionHandLog), [sessionHandLog]);
+
+  // ── Views (modals) ──
+  const [showSessionHistory, setShowSessionHistory] = useState(false);
+  const [observingPlayer, setObservingPlayer] = useState(null);
+
+  const startSession = () => {
+    if (!session.room || !session.blind) {
+      setShowSettings(true);
+      return;
+    }
+    setSession((s) => ({ ...s, active: true, startTime: Date.now(), handCount: 0 }));
+    // Reset table: all seats fresh Random, all active
+    const fresh = [];
+    let counter = 0;
+    for (let i = 0; i < tableSize; i++) {
+      if (i === 0) {
+        fresh.push({ playerId: "hero", isHero: true, status: "active" });
+      } else {
+        counter += 1;
+        fresh.push({ playerId: `random_${counter}`, isHero: false, status: "active" });
+      }
+    }
+    setSeats(fresh);
+    setBtnSeatIdx(0);
+    // Reset all session stats
+    setPlayerDB((prev) => prev.map((p) => ({ ...p, sessionStats: emptyStats() })));
+    setRandomPlayers({});
+    setHandLog([]);
+    setSessionHandLog([]);
+    setEditingSeat(null);
+    setReorderMode(false);
+    // Build initial hand
+    const layout = computeLayout(fresh, 0, options);
+    setHand(buildInitialHand(fresh, layout, options));
+  };
+
+  const endSession = () => {
+    // Save current session to history
+    const duration = Math.floor((Date.now() - session.startTime) / 1000);
+    const entry = {
+      id: session.id,
+      room: session.room,
+      blind: session.blind,
+      handCount: session.handCount,
+      duration,
+      date: new Date(session.startTime).toISOString(),
+    };
+    setSessionHistory((prev) => [...prev, entry]);
+    // Reset session stats
+    setPlayerDB((prev) => prev.map((p) => ({ ...p, sessionStats: emptyStats() })));
+    setRandomPlayers({});
+    setSession((s) => ({ ...s, id: s.id + 1, startTime: Date.now(), handCount: 0, active: false }));
+    setHandLog([]);
+  };
+
+  // ── Persist on changes ──
+  useEffect(() => saveJSON(STORAGE_KEYS.tableSize, tableSize), [tableSize]);
+  useEffect(() => saveJSON(STORAGE_KEYS.players, playerDB), [playerDB]);
+  useEffect(() => saveJSON(STORAGE_KEYS.seats, seats), [seats]);
+
+  // Rebuild hand positions when seats change (swap, status change) — only if no hand in progress
+  useEffect(() => {
+    if (!hand || hand.events.length > 0) return;
+    const layout = computeLayout(seats, btnSeatIdx, options);
+    setHand(buildInitialHand(seats, layout, options));
+  }, [seats, btnSeatIdx, options.straddle, options.mississippi]);
+  useEffect(() => saveJSON(STORAGE_KEYS.btnSeatIdx, btnSeatIdx), [btnSeatIdx]);
+  useEffect(() => saveJSON(STORAGE_KEYS.options, options), [options]);
+
+  // ── Sync seats with table size ──
+  useEffect(() => {
+    setSeats((prev) => {
+      if (prev.length === tableSize) return prev;
+      const next = [...prev];
+      while (next.length < tableSize) {
+        const num = nextRandomNum(next, randomPlayers);
+        next.push({
+          playerId: `random_${num}`,
+          isHero: false,
+          status: "active",
+        });
+      }
+      while (next.length > tableSize) next.pop();
+      if (!next.some((s) => s && s.isHero)) {
+        next[0] = { ...next[0], isHero: true, playerId: "hero" };
+      }
+      return next;
+    });
+    if (btnSeatIdx >= tableSize) setBtnSeatIdx(0);
+  }, [tableSize]);
+
+  // ── Compute layout & build new hand on relevant changes ──
+  // Auto-move BTN if it lands on an inactive seat
+  useEffect(() => {
+    if (!seats || seats.length === 0) return;
+    const curr = seats[btnSeatIdx];
+    if (!curr || !isSeatPlayable(curr)) {
+      // Find next playable seat clockwise
+      for (let i = 1; i <= seats.length; i++) {
+        const cand = (btnSeatIdx + i) % seats.length;
+        if (isSeatPlayable(seats[cand])) {
+          setBtnSeatIdx(cand);
+          return;
+        }
+      }
+    }
+  }, [seats, btnSeatIdx]);
+
+  const layout = useMemo(
+    () => computeLayout(seats, btnSeatIdx, options),
+    [seats, btnSeatIdx, options]
+  );
+
+  useEffect(() => {
+    const freshLayout = computeLayout(seats, btnSeatIdx, options);
+    setHand(buildInitialHand(seats, freshLayout, options));
+    // eslint-disable-next-line
+  }, [seats, btnSeatIdx, options.straddle, options.mississippi]);
+
+  // ── Helpers to mutate playerDB ──
+
+  // Resolve a seat's player data. Returns {id, name, sessionStats, globalStats, isRandom}.
+  // For random seats: pulls from randomPlayers, creating entry on demand.
+  // Random name is derived from the playerId itself (stable across seat swaps).
+  const getPlayerForSeat = (seatIdx) => {
+    const seat = seats[seatIdx];
+    if (!seat || !seat.playerId) return null;
+    const pid = seat.playerId;
+    if (isRandomId(pid)) {
+      const existing = randomPlayers[pid];
+      if (existing) {
+        return {
+          id: pid,
+          name: existing.name,
+          sessionStats: existing.sessionStats || emptyStats(),
+          globalStats: emptyStats(),
+          isRandom: true,
+        };
+      }
+      // Stable name: derived from the ID itself
+      const num = randomNumFromId(pid);
+      return {
+        id: pid,
+        name: `Random#${num ?? "?"}`,
+        sessionStats: emptyStats(),
+        globalStats: emptyStats(),
+        isRandom: true,
+      };
+    }
+    const p = playerDB.find((pp) => pp.id === pid);
+    if (!p) return null;
+    return { ...p, isRandom: false };
+  };
+
+  const ensurePlayerInDB = (name) => {
+    const normalized = normalizeName(name);
+    if (!normalized) return null;
+    if (isRandomName(normalized)) {
+      alert(`"${normalized}" est un nom réservé. Utilise un autre pseudo.`);
+      return null;
+    }
+    const existing = playerDB.find(
+      (p) => normalizeName(p.name) === normalized
+    );
+    if (existing) return existing.id;
+    const id = `p_${Date.now()}_${Math.random().toString(36).slice(2, 7)}`;
+    const newPlayer = {
+      id, name: normalized,
+      room: session.room || "",
+      sessionStats: emptyStats(),
+      globalStats: emptyStats(),
+    };
+    setPlayerDB((prev) => [...prev, newPlayer]);
+    return id;
+  };
+
+  const renamePlayerInDB = (playerId, newName) => {
+    const normalized = normalizeName(newName);
+    if (!normalized) return;
+    if (isRandomName(normalized)) return;
+    setPlayerDB((prev) => prev.map((p) =>
+      p.id === playerId ? { ...p, name: normalized } : p
+    ));
+  };
+
+  const assignPlayerToSeat = (seatIdx, playerId) => {
+    setSeats((prev) => prev.map((s, i) =>
+      i === seatIdx ? { ...s, playerId } : s
+    ));
+  };
+
+  const emptySeat = (seatIdx) => {
+    setSeats((prev) => {
+      const num = nextRandomNum(prev, randomPlayers);
+      return prev.map((s, i) => {
+        if (i !== seatIdx) return s;
+        if (s.isHero) return s;
+        return { ...s, playerId: `random_${num}` };
+      });
+    });
+  };
+
+  // Hero is always seat 0 with a fixed name
+  useEffect(() => {
+    if (!playerDB.some((p) => p.id === "hero")) {
+      setPlayerDB((prev) => [
+        { id: "hero", name: "Hero", sessionStats: emptyStats(), globalStats: emptyStats() },
+        ...prev,
+      ]);
+    }
+    // ensure hero seat is set
+    setSeats((prev) => prev.map((s, i) =>
+      i === 0 ? { playerId: "hero", isHero: true } : s
+    ));
+    // eslint-disable-next-line
+  }, []);
+
+  // ── Actions ──
+  const onAction = (seatIdx, type) => {
+    if (!hand) return;
+    setHandLog((log) => [...log.slice(-49), { hand: cloneHand(hand) }]);
+    const nextHand = applyAction(hand, seatIdx, type);
+    setHand(nextHand);
+    if (nextHand.closed) {
+      setTimeout(() => window.scrollTo({ top: 0, behavior: "smooth" }), 100);
+    }
+  };
+
+  const undoLast = () => {
+    setHandLog((log) => {
+      if (log.length === 0) return log;
+      const prev = log[log.length - 1];
+      setHand(prev.hand);
+      return log.slice(0, -1);
+    });
+  };
+
+  const resetHand = () => {
+    setHand(buildInitialHand(seats, layout, options));
+    setHandLog([]);
+  };
+
+  // Reset session stats only (real players' session + all random)
+  const resetSession = () => {
+    setPlayerDB((prev) => prev.map((p) => ({ ...p, sessionStats: emptyStats() })));
+    setRandomPlayers({});
+  };
+
+  const commitHand = (showdownData = null) => {
+    if (!hand) return;
+
+    // Build delta for each player (real + random)
+    const deltas = {}; // playerId → { delta, isRandom, name, room }
+
+    seats.forEach((s, seatIdx) => {
+      if (!s || !s.playerId) return;
+      const ev = hand.playerEvents[seatIdx];
+      if (!ev || !ev.dealt) return;
+      const pos = hand.positions[seatIdx] || "?";
+      const sdCards = showdownData?.[seatIdx] || null;
+      const add = singleHandToStats(ev, pos, sdCards);
+      const isRandom = isRandomId(s.playerId);
+      let name = "";
+      if (isRandom) {
+        const num = randomNumFromId(s.playerId);
+        name = randomPlayers[s.playerId]?.name || `Random#${num ?? "?"}`;
+      } else {
+        const p = playerDB.find(pp => pp.id === s.playerId);
+        name = p?.name || "?";
+      }
+      deltas[s.playerId] = { delta: add, isRandom, name };
+    });
+
+    // 1. Update real players (hero + named)
+    setPlayerDB((prev) => prev.map((p) => {
+      const d = deltas[p.id];
+      if (!d || d.isRandom) return p;
+      return {
+        ...p,
+        sessionStats: mergeStats(p.sessionStats || emptyStats(), d.delta),
+        globalStats: mergeStats(p.globalStats || emptyStats(), d.delta),
+      };
+    }));
+
+    // 2. Update random pseudo-players (session only)
+    setRandomPlayers((prev) => {
+      const next = { ...prev };
+      Object.entries(deltas).forEach(([pid, d]) => {
+        if (!d.isRandom) return;
+        const existing = next[pid];
+        next[pid] = {
+          name: existing?.name || d.name,
+          sessionStats: mergeStats(existing?.sessionStats || emptyStats(), d.delta),
+        };
+      });
+      return next;
+    });
+
+    // 3. Append to session hand log (for delete + display)
+    const descriptor = buildHandDescriptor(hand, seats, playerDB, randomPlayers);
+    setSessionHandLog((log) => [
+      ...log,
+      {
+        id: `hand_${Date.now()}_${Math.random().toString(36).slice(2, 7)}`,
+        descriptor,
+        deltas, // { playerId: { delta, isRandom, name } }
+        committedAt: Date.now(),
+      },
+    ]);
+
+    // 4. Move BTN clockwise
+    const n = seats.length;
+    let nb = btnSeatIdx;
+    for (let i = 1; i <= n; i++) {
+      const cand = (btnSeatIdx + i) % n;
+      if (seats[cand] && seats[cand].playerId) { nb = cand; break; }
+    }
+    setBtnSeatIdx(nb);
+    setHandLog([]);
+    setShowShowdown(false);
+    setSession((s) => ({ ...s, handCount: s.handCount + 1 }));
+    setOptions((o) => ({ ...o, straddle: false, mississippi: false }));
+  };
+
+  // Delete a committed hand: subtract its deltas from all affected players
+  const deleteCommittedHand = (handId) => {
+    const entry = sessionHandLog.find(h => h.id === handId);
+    if (!entry) return;
+    setPlayerDB((prev) => prev.map((p) => {
+      const d = entry.deltas[p.id];
+      if (!d || d.isRandom) return p;
+      return {
+        ...p,
+        sessionStats: subtractStats(p.sessionStats || emptyStats(), d.delta),
+        globalStats: subtractStats(p.globalStats || emptyStats(), d.delta),
+      };
+    }));
+    setRandomPlayers((prev) => {
+      const next = { ...prev };
+      Object.entries(entry.deltas).forEach(([pid, d]) => {
+        if (!d.isRandom) return;
+        const existing = next[pid];
+        if (!existing) return;
+        next[pid] = {
+          ...existing,
+          sessionStats: subtractStats(existing.sessionStats || emptyStats(), d.delta),
+        };
+      });
+      return next;
+    });
+    setSessionHandLog((log) => log.filter(h => h.id !== handId));
+    setSession((s) => ({ ...s, handCount: Math.max(0, s.handCount - 1) }));
+  };
+
+  const handlePromptShowdown = () => setShowShowdown(true);
+
+  // ── Move player up/down (reorder) ──
+  const swapSeats = (i, j) => {
+    setSeats((prev) => {
+      const next = [...prev];
+      [next[i], next[j]] = [next[j], next[i]];
+      return next;
+    });
+  };
+
+  const movePlayer = (seatIdx, dir) => {
+    const n = seats.length;
+    const target = (seatIdx + dir + n) % n;
+    swapSeats(seatIdx, target);
+    if (btnSeatIdx === seatIdx) setBtnSeatIdx(target);
+    else if (btnSeatIdx === target) setBtnSeatIdx(seatIdx);
+  };
+
+  // Swap: exchange playerId AND status between two seats.
+  // Hero is locked. Positions are recalculated by the seats useEffect.
+  const moveSeat = (from, to) => {
+    if (from === to) return;
+    setSeats((prev) => {
+      if (!prev[from] || !prev[to]) return prev;
+      if (prev[from].isHero || prev[to].isHero) return prev;
+      const next = [...prev];
+      const tmpId = next[from].playerId;
+      const tmpStatus = next[from].status;
+      next[from] = { ...next[from], playerId: next[to].playerId, status: next[to].status || "active" };
+      next[to] = { ...next[to], playerId: tmpId, status: tmpStatus || "active" };
+      return next;
+    });
+  };
+
+  const setSeatStatus = (seatIdx, status) => {
+    if (status === "open") {
+      // Replace the player with an Unknown (like a fresh random) and set seat to open
+      setSeats((prev) => {
+        const num = nextRandomNum(prev, randomPlayers);
+        return prev.map((s, i) => {
+          if (i !== seatIdx) return s;
+          if (s.isHero) return s;
+          return { ...s, playerId: `random_${num}`, status: "open" };
+        });
+      });
+    } else {
+      setSeats((prev) => prev.map((s, i) =>
+        i === seatIdx ? { ...s, status } : s
+      ));
+    }
+  };
+
+  // Toggle POST status for a seat. If the seat is directly after the BU (= SB position),
+  // this becomes a "buy button" scenario — the player becomes BB, no SB for this hand.
+  const togglePost = (seatIdx) => {
+    if (!hand || hand.events.length > 0) return;
+    setHand((h) => {
+      if (!h) return h;
+      const posts = new Set(h.posts || []);
+      if (posts.has(seatIdx)) {
+        posts.delete(seatIdx);
+      } else {
+        posts.add(seatIdx);
+      }
+      // Check if ANY posted seat is directly after BU (= buy button scenario)
+      let buyButtonSeat = null;
+      posts.forEach((sidx) => {
+        if (isSeatDirectlyAfterBU(h, sidx)) buyButtonSeat = sidx;
+      });
+      const newLayout = buyButtonSeat !== null
+        ? rebuildLayoutForBuyButton(seats, h.buSeat, buyButtonSeat, options)
+        : computeLayout(seats, btnSeatIdx, options);
+      return {
+        ...h,
+        posts,
+        order: newLayout.order,
+        positions: newLayout.positions,
+        buSeat: newLayout.buSeat,
+        inHand: new Set(newLayout.order),
+        playerEvents: seats.map((s) => {
+          if (!s) return null;
+          const opp = {}; const act = {};
+          STAT_KEYS.forEach((k) => { opp[k] = false; act[k] = false; });
+          return { dealt: true, opp, act, postChecked: false };
+        }),
+      };
+    });
+  };
+
+  // Check if a seatIdx is the seat directly after the BU in the physical order
+  const isSeatDirectlyAfterBU = (h, seatIdx) => {
+    if (!h || h.buSeat == null) return false;
+    const n = seats.length;
+    let next = (h.buSeat + 1) % n;
+    // Skip empty seats
+    while ((!seats[next] || !seats[next].playerId || seats[next].status === "open" || seats[next].status === "break") && next !== h.buSeat) {
+      next = (next + 1) % n;
+    }
+    return next === seatIdx;
+  };
+
+  // Rebuild layout for BUY BUTTON: the posting seat (in SB position) becomes BB,
+  // no SB for this hand. The ex-BB becomes a normal UTG-like position.
+  // Physical BU stays the same. Action order: first to act is UTG-most, last is the new BB (posting seat).
+  const rebuildLayoutForBuyButton = (seatsArg, buSeat, postingSeat, opts) => {
+    const n = seatsArg.length;
+    // Get active seats clockwise from BU (excluding open/break)
+    const active = [];
+    for (let i = 0; i < n; i++) {
+      const idx = (buSeat + i) % n;
+      if (isSeatPlayable(seatsArg[idx]) && seatsArg[idx].playerId !== null) active.push(idx);
+    }
+    const activeCount = active.length;
+    if (activeCount < 2) return computeLayout(seatsArg, buSeat, opts);
+
+    // Layout: active[0] = BU, active[1] = posting seat = BB (only BB, no SB)
+    // active[2..] = UTG-most going toward CO
+    const positions = new Array(n).fill(null);
+    positions[active[0]] = "BU";
+    positions[active[1]] = "BB"; // posting seat
+    // Remaining active[2..activeCount-1] get UTG-most → CO labels
+    const posLabels = buildPositions(activeCount);
+    // In normal layout: positions in front of BU (UTG-most → CO) are posLabels[0..activeCount-4]
+    // In buy button: no SB, so active[2..] take posLabels[0..activeCount-3]
+    // Available labels for seats 2+: UTG-most, UTG+N, ..., MP, HJ, CO
+    // activeCount-2 seats to label with these labels
+    const utgLabels = [];
+    for (let i = 0; i < activeCount - 2; i++) {
+      utgLabels.push(posLabels[i] || `U${i}`);
+    }
+    for (let k = 2; k < activeCount; k++) {
+      positions[active[k]] = utgLabels[k - 2];
+    }
+
+    // Action order: UTG-most first → ... → CO → BU → BB (posting seat last)
+    const order = [];
+    for (let k = activeCount - 1; k >= 2; k--) order.push(active[k]); // CO ... UTG-most reversed? No we want UTG-most first
+    // Wait: active[activeCount-1] is closest to BU (= CO), active[2] is furthest (UTG-most)
+    // We want UTG-most (= active[activeCount-1]) first? No.
+    // active is ordered CLOCKWISE from BU. So active[1] is the first seat after BU (= new BB here).
+    // active[2] is second seat after BU. In normal layout active[2] = BB is last to act.
+    // Here, we want: after BU, the UTG-most acts first preflop.
+    // Going clockwise from BU: active[1]=BB(posting), active[2]=?, ...
+    // Normally UTG-most is active[activeCount-1] (the seat just before BU clockwise-wise,
+    // i.e. the seat 1 step counter-clockwise from BU).
+    // Wait, I'm confusing myself.
+    // active is built: for i=0..n-1, idx=(buSeat+i)%n, push if playable.
+    // So active[0]=BU, active[1]=seat right after BU clockwise, active[2]=next, etc.
+    // active[activeCount-1] is the last playable seat before wrapping back to BU.
+    // Preflop action: UTG acts first. UTG is the seat right after BB.
+    // In normal layout with SB & BB: order is UTG=active[3]... CO=active[activeCount-1], BU=active[0], SB=active[1], BB=active[2].
+    // In buy button: no SB. BB=posting seat=active[1]. UTG acts first = active[2].
+    // Order: UTG=active[2], active[3], ..., CO=active[activeCount-1], BU=active[0], BB=active[1] (last)
+    const actionOrder = [];
+    for (let k = 2; k < activeCount; k++) actionOrder.push(active[k]);
+    actionOrder.push(active[0]); // BU
+    actionOrder.push(active[1]); // BB (posting, last to act)
+
+    return { order: actionOrder, positions, buSeat };
+  };
+
+  // Reset table: Hero + fresh Random everywhere, BTN on Hero.
+  // ALSO clears session stats (real players' session + all random).
+  // Global stats of real players are preserved.
+  const resetTable = () => {
+    const fresh = [];
+    let counter = 0;
+    for (let i = 0; i < tableSize; i++) {
+      if (i === 0) {
+        fresh.push({ playerId: "hero", isHero: true, status: "active" });
+      } else {
+        counter += 1;
+        fresh.push({
+          playerId: `random_${counter}`,
+          isHero: false,
+          status: "active",
+        });
+      }
+    }
+    setSeats(fresh);
+    setBtnSeatIdx(0);
+    setHandLog([]);
+    setEditingSeat(null);
+    setReorderMode(false);
+    // Clear session stats (everyone) — global stats kept
+    setPlayerDB((prev) => prev.map((p) => ({ ...p, sessionStats: emptyStats() })));
+    setRandomPlayers({});
+    // Force rebuild the hand immediately with the new seats
+    const newLayout = computeLayout(fresh, 0, options);
+    setHand(buildInitialHand(fresh, newLayout, options));
+  };
+
+  // ── Export / Import ──
+  const [exportModalOpen, setExportModalOpen] = useState(false);
+
+  const exportData = () => setExportModalOpen(true);
+
+  const exportAll = () => {
+    const data = {};
+    Object.entries(STORAGE_KEYS).forEach(([key, storageKey]) => {
+      const raw = localStorage.getItem(storageKey);
+      if (raw !== null) data[storageKey] = JSON.parse(raw);
+    });
+    const blob = new Blob([JSON.stringify(data, null, 2)], { type: "application/json" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `trck-it-backup-${new Date().toISOString().slice(0,10)}.json`;
+    a.click();
+    URL.revokeObjectURL(url);
+    setExportModalOpen(false);
+  };
+
+  const exportPlayersList = (playerIds) => {
+    const players = playerDB.filter(p => playerIds.includes(p.id) && p.id !== "hero");
+    if (players.length === 0) return;
+    const data = { version: 1, type: "players", players };
+    const blob = new Blob([JSON.stringify(data, null, 2)], { type: "application/json" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `trck-it-players-${new Date().toISOString().slice(0,10)}.json`;
+    a.click();
+    URL.revokeObjectURL(url);
+    setExportModalOpen(false);
+  };
+
+  const importRef = useRef(null);
+  const [importConflicts, setImportConflicts] = useState(null); // { players: [...], resolutions: {id: 'merge'|'rename'|'skip'} }
+
+  const importData = () => {
+    if (!importRef.current) {
+      const input = document.createElement("input");
+      input.type = "file";
+      input.accept = ".json";
+      input.style.display = "none";
+      document.body.appendChild(input);
+      importRef.current = input;
+    }
+    const input = importRef.current;
+    input.onchange = (e) => {
+      const file = e.target.files?.[0];
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = (ev) => {
+        try {
+          const data = JSON.parse(ev.target.result);
+          // Format 1: single player export { type: "player", player: {...} }
+          // Format 2: multi-player export { type: "players", players: [...] }
+          // Format 3: full backup (raw localStorage dump)
+          if (data.type === "player" && data.player) {
+            handlePlayerImport([data.player]);
+          } else if (data.type === "players" && Array.isArray(data.players)) {
+            handlePlayerImport(data.players);
+          } else {
+            // Full backup — replace everything
+            if (!confirm("Cet import va remplacer TOUTES tes données. Continuer ?")) return;
+            Object.entries(data).forEach(([key, value]) => {
+              localStorage.setItem(key, JSON.stringify(value));
+            });
+            window.location.reload();
+          }
+        } catch (err) {
+          alert("Fichier invalide : " + err.message);
+        }
+      };
+      reader.readAsText(file);
+      input.value = "";
+    };
+    input.click();
+  };
+
+  // Preview state for bucket import
+  const [importPreview, setImportPreview] = useState(null); // { newPlayers, conflicts }
+
+  // Find next available rename suffix for a name (e.g. "JEAN" → "JEAN#1" → "JEAN#2")
+  const findRenameForImport = (baseName, dbList) => {
+    const norm = (s) => normalizeName(s);
+    const base = norm(baseName);
+    let n = 1;
+    while (dbList.some(p => norm(p.name) === `${base}#${n}`)) n++;
+    return `${base}#${n}`;
+  };
+
+  const handlePlayerImport = (incomingPlayers) => {
+    const conflicts = [];
+    const newPlayers = [];
+    incomingPlayers.forEach((p) => {
+      const existing = playerDB.find((dbp) => normalizeName(dbp.name) === normalizeName(p.name));
+      if (existing) {
+        conflicts.push({ incoming: p, existing });
+      } else {
+        newPlayers.push(p);
+      }
+    });
+    // If single player, skip preview and go directly to conflict resolution (or import)
+    if (incomingPlayers.length === 1) {
+      if (newPlayers.length > 0) {
+        importNewPlayers(newPlayers);
+        alert(`${newPlayers.length} joueur(s) importé(s).`);
+      } else if (conflicts.length > 0) {
+        const resolutions = {};
+        conflicts.forEach((c) => { resolutions[c.incoming.name] = "merge"; });
+        setImportConflicts({ conflicts, resolutions });
+      }
+      return;
+    }
+    // Bucket import: show preview
+    setImportPreview({ newPlayers, conflicts });
+  };
+
+  const importNewPlayers = (newPlayers) => {
+    setPlayerDB((prev) => {
+      let next = [...prev];
+      newPlayers.forEach((p) => {
+        const id = `p_${Date.now()}_${Math.random().toString(36).slice(2, 7)}_${Math.floor(Math.random()*1000)}`;
+        next.push({
+          id, name: normalizeName(p.name), room: p.room || "",
+          sessionStats: p.sessionStats || emptyStats(),
+          globalStats: p.globalStats || emptyStats(),
+        });
+      });
+      return next;
+    });
+  };
+
+  const importBucketAction = (action) => {
+    if (!importPreview) return;
+    const { newPlayers, conflicts } = importPreview;
+    importNewPlayers(newPlayers);
+    if (action === "merge") {
+      // Merge all conflicts
+      setPlayerDB((prev) => {
+        let next = [...prev];
+        conflicts.forEach((c) => {
+          next = next.map((p) =>
+            p.id === c.existing.id
+              ? {
+                ...p,
+                globalStats: mergeStats(p.globalStats || emptyStats(), c.incoming.globalStats || emptyStats()),
+                sessionStats: mergeStats(p.sessionStats || emptyStats(), c.incoming.sessionStats || emptyStats()),
+              }
+              : p
+          );
+        });
+        return next;
+      });
+      setImportPreview(null);
+      alert(`Import terminé : ${newPlayers.length} nouveau(x), ${conflicts.length} mergé(s).`);
+    } else if (action === "rename") {
+      // Rename all with #N suffix
+      setPlayerDB((prev) => {
+        let next = [...prev];
+        conflicts.forEach((c) => {
+          const newName = findRenameForImport(c.incoming.name, next);
+          const id = `p_${Date.now()}_${Math.random().toString(36).slice(2, 7)}_${Math.floor(Math.random()*1000)}`;
+          next.push({
+            id, name: newName, room: c.incoming.room || "",
+            sessionStats: c.incoming.sessionStats || emptyStats(),
+            globalStats: c.incoming.globalStats || emptyStats(),
+          });
+        });
+        return next;
+      });
+      setImportPreview(null);
+      alert(`Import terminé : ${newPlayers.length} nouveau(x), ${conflicts.length} renommé(s).`);
+    } else if (action === "choose") {
+      // Open per-conflict resolution
+      const resolutions = {};
+      conflicts.forEach((c) => { resolutions[c.incoming.name] = "merge"; });
+      setImportPreview(null);
+      setImportConflicts({ conflicts, resolutions });
+    }
+  };
+
+  const applyImportResolutions = () => {
+    if (!importConflicts) return;
+    const { conflicts, resolutions } = importConflicts;
+    setPlayerDB((prev) => {
+      let next = [...prev];
+      conflicts.forEach((c) => {
+        const resolution = resolutions[c.incoming.name];
+        if (resolution === "skip") return;
+        if (resolution === "merge") {
+          // Merge into existing
+          next = next.map((p) =>
+            p.id === c.existing.id
+              ? {
+                ...p,
+                globalStats: mergeStats(p.globalStats || emptyStats(), c.incoming.globalStats || emptyStats()),
+                sessionStats: mergeStats(p.sessionStats || emptyStats(), c.incoming.sessionStats || emptyStats()),
+              }
+              : p
+          );
+        } else if (resolution.startsWith("rename:")) {
+          const newName = normalizeName(resolution.slice(7));
+          if (!newName || next.some((p) => normalizeName(p.name) === newName)) return; // skip if still conflicts
+          const id = `p_${Date.now()}_${Math.random().toString(36).slice(2, 7)}`;
+          next.push({
+            id, name: newName, room: c.incoming.room || "",
+            sessionStats: c.incoming.sessionStats || emptyStats(),
+            globalStats: c.incoming.globalStats || emptyStats(),
+          });
+        }
+      });
+      return next;
+    });
+    setImportConflicts(null);
+  };
+
+  if (!hand && session.active) return null;
+
+  return (
+    React.createElement("div", {"className": "app"}, React.createElement("style", null, CSS), React.createElement("div", {"className": "scanlines", "aria-hidden": true}), React.createElement(Header, {"tableSize": tableSize, "setTableSize": setTableSize, "onResetTable": resetTable, "onSettings": () => setShowSettings(true), "onReorder": () => setReorderMode((r) => !r), "reorderMode": reorderMode, "onHistory": () => setShowSessionHistory(true), "onObserver": () => setObservingPlayer("_list"), "onExport": exportData, "onImport": importData, "handStarted": hand ? hand.events.length > 0 : false, "sessionActive": session.active}), !session.active ? (
+        React.createElement("div", {"className": "start-session-wrap"}, React.createElement("button", {"className": "start-session-btn", "onClick": startSession}, "START SESSION"), (!session.room || !session.blind) && (
+            React.createElement("p", {"className": "start-hint"}, "Sélectionne d'abord une room et un blind dans les réglages ⚙")
+          ), session.room && session.blind && (
+            React.createElement("p", {"className": "start-hint"}, session.room, "—", session.blind)
+          ))
+      ) : (
+        React.createElement(React.Fragment, null, React.createElement(StatusBar, {"hand": hand, "session": session, "elapsed": elapsed, "onCommit": () => commitHand(), "onShowdown": handlePromptShowdown, "onEndSession": endSession}), React.createElement(HandControls, {"onUndo": undoLast, "canUndo": handLog.length > 0, "onResetHand": resetHand, "straddle": options.straddle, "mississippi": options.mississippi, "handStarted": hand.events.length > 0, "onToggleStraddle": () => {
+              if (hand.events.length > 0) return;
+              setOptions((o) => {
+                if (o.straddle && !o.mississippi) return { ...o, straddle: false };
+                return { ...o, straddle: true, mississippi: false };
+              });
+            }, "onToggleMississippi": () => {
+              if (hand.events.length > 0) return;
+              setOptions((o) => {
+                if (o.mississippi) return { ...o, straddle: false, mississippi: false };
+                return { ...o, straddle: true, mississippi: true };
+              });
+            }}), React.createElement(PlayerList, {"hand": hand, "seats": seats, "getPlayerForSeat": getPlayerForSeat, "onAction": onAction, "onStartEdit": (seatIdx) => setEditingSeat(seatIdx), "onSetSeatStatus": setSeatStatus, "onTogglePost": togglePost, "reorderMode": reorderMode, "moveSeat": moveSeat, "canReorder": hand.events.length === 0}), React.createElement(BTNPlacer, {"seats": seats, "btnSeatIdx": btnSeatIdx, "setBtnSeatIdx": setBtnSeatIdx}), session.active && (
+            React.createElement(TableAveragesBar, {"seats": seats, "getPlayerForSeat": getPlayerForSeat, "session": session, "elapsed": elapsed})
+          ), session.active && (
+            React.createElement(TableAveragesBar, {"seats": seats, "getPlayerForSeat": getPlayerForSeat, "session": session})
+          ), React.createElement(StatsTable, {"seats": seats, "getPlayerForSeat": getPlayerForSeat, "view": options.statsView, "setView": (v) => setOptions((o) => ({ ...o, statsView: v })), "onResetSession": resetSession, "session": session, "elapsed": elapsed}), session.active && sessionHandLog.length > 0 && (
+            React.createElement(SessionHandLog, {"log": sessionHandLog, "onDelete": deleteCommittedHand})
+          ))
+      ), editingSeat !== null && (() => {
+        const seat = seats[editingSeat];
+        const isRandomSeat = seat && seat.playerId && isRandomId(seat.playerId);
+
+        // Real player → can't rename in session
+        if (!isRandomSeat) {
+          return (
+            React.createElement("div", {"className": "modal-bg", "onClick": () => setEditingSeat(null)}, React.createElement("div", {"className": "modal", "onClick": (e) => e.stopPropagation()}, React.createElement("div", {"className": "modal-head"}, React.createElement("h3", null, "INFO"), React.createElement("button", {"className": "modal-close", "onClick": () => setEditingSeat(null)}, React.createElement(X, {"size": 14}))), React.createElement("div", {"className": "modal-body"}, React.createElement("p", {"className": "opt-hint", "style": { fontSize: 12, lineHeight: 1.5 }}, "Impossible de renommer un joueur en session."), React.createElement("p", {"className": "opt-hint", "style": { fontSize: 11 }}, "Utilise", React.createElement("strong", null, "SEAT OPEN"), "(⋯ menu) pour libérer le siège, ou", React.createElement("strong", null, "mode reorder"), "(↕) pour changer de place."))))
+          );
+        }
+
+        // Random seat → assign a player, then ask keep stats or fresh
+        const currentSessionStats = (randomPlayers[seat.playerId]?.sessionStats) || emptyStats();
+        const hasSessionStats = currentSessionStats.hands > 0;
+
+        const doAssign = (playerId) => {
+          if (hasSessionStats) {
+            setPendingAssign({ seatIdx: editingSeat, playerId, sessionStats: currentSessionStats });
+            setEditingSeat(null);
+          } else {
+            assignPlayerToSeat(editingSeat, playerId);
+            setEditingSeat(null);
+          }
+        };
+
+        return (
+          React.createElement(NameModal, {"key": editingSeat, "mode": "assign", "currentName": "", "playerDB": playerDB, "seats": seats, "onPick": (playerId) => doAssign(playerId), "onCreate": (name) => {
+              const id = ensurePlayerInDB(name);
+              if (id) doAssign(id);
+              else setEditingSeat(null);
+            }, "onRename": () => {}, "onClose": () => setEditingSeat(null)})
+        );
+      })(), pendingAssign && (
+        React.createElement("div", {"className": "modal-bg", "onClick": () => setPendingAssign(null)}, React.createElement("div", {"className": "modal", "onClick": (e) => e.stopPropagation()}, React.createElement("div", {"className": "modal-head"}, React.createElement("h3", null, "STATS SESSION"), React.createElement("button", {"className": "modal-close", "onClick": () => {
+                // Cancel: just assign fresh
+                assignPlayerToSeat(pendingAssign.seatIdx, pendingAssign.playerId);
+                setPendingAssign(null);
+              }}, React.createElement(X, {"size": 14}))), React.createElement("div", {"className": "modal-body"}, React.createElement("p", {"className": "opt-hint", "style": { fontSize: 12, lineHeight: 1.5, marginBottom: 12 }}, "Le joueur précédent avait", React.createElement("strong", null, pendingAssign.sessionStats.hands, "mains"), "enregistrées cette session."), React.createElement("div", {"style": { display: "flex", gap: 8, flexDirection: "column" }}, React.createElement("button", {"className": "name-btn rename", "onClick": () => {
+                  assignPlayerToSeat(pendingAssign.seatIdx, pendingAssign.playerId);
+                  setPlayerDB((prev) => prev.map((p) =>
+                    p.id === pendingAssign.playerId
+                      ? { ...p, sessionStats: mergeStats(p.sessionStats || emptyStats(), pendingAssign.sessionStats) }
+                      : p
+                  ));
+                  setPendingAssign(null);
+                }}, "GARDER LES STATS SESSION"), React.createElement("button", {"className": "name-btn rename-reset", "onClick": () => {
+                  assignPlayerToSeat(pendingAssign.seatIdx, pendingAssign.playerId);
+                  setPendingAssign(null);
+                }}, "REPARTIR À ZÉRO")))))
+      ), importConflicts && (
+        React.createElement("div", {"className": "modal-bg", "onClick": (e) => { if (e.target === e.currentTarget) setImportConflicts(null); }}, React.createElement("div", {"className": "modal modal-wide"}, React.createElement("div", {"className": "modal-head"}, React.createElement("h3", null, "RÉSOUDRE CONFLITS"), React.createElement("button", {"className": "modal-close", "onClick": () => setImportConflicts(null)}, React.createElement(X, {"size": 14}))), React.createElement("div", {"className": "modal-body", "style": { maxHeight: "70vh", overflowY: "auto" }}, React.createElement("p", {"className": "opt-hint", "style": { marginBottom: 12 }}, importConflicts.conflicts.length, "joueur(s) existe(nt) déjà. Choisis pour chacun :"), importConflicts.conflicts.map((c, i) => {
+                const res = importConflicts.resolutions[c.incoming.name] || "merge";
+                const isRename = res.startsWith("rename:");
+                const renameVal = isRename ? res.slice(7) : "";
+                const setRes = (newRes) => setImportConflicts({
+                  ...importConflicts,
+                  resolutions: { ...importConflicts.resolutions, [c.incoming.name]: newRes }
+                });
+                return (
+                  React.createElement("div", {"key": i, "className": "import-conflict"}, React.createElement("div", {"className": "import-conflict-head"}, React.createElement("span", {"className": "import-conflict-name"}, c.incoming.name), React.createElement("span", {"className": "import-conflict-meta"}, "Import:", (c.incoming.globalStats?.hands || 0), "h · Existant:", (c.existing.globalStats?.hands || 0), "h")), React.createElement("div", {"className": "import-conflict-choices"}, React.createElement("button", {"className": `tog ${res === "merge" ? "on" : ""}`, "onClick": () => setRes("merge")}, "MERGE"), React.createElement("button", {"className": `tog ${isRename ? "on" : ""}`, "onClick": () => setRes("rename:" + c.incoming.name + "2")}, "RENAME"), React.createElement("button", {"className": `tog ${res === "skip" ? "on" : ""}`, "onClick": () => setRes("skip")}, "SKIP")), isRename && (
+                      React.createElement("input", {"className": "ss-input", "style": { marginTop: 6 }, "value": renameVal, "onChange": (e) => setRes("rename:" + e.target.value), "placeholder": "Nouveau nom..."})
+                    ))
+                );
+              })), React.createElement("div", {"className": "modal-foot"}, React.createElement("button", {"className": "next-hand", "style": { animation: "none", width: "100%" }, "onClick": applyImportResolutions}, "APPLIQUER"))))
+      ), exportModalOpen && (
+        React.createElement(ExportModal, {"playerDB": playerDB, "onExportAll": exportAll, "onExportPlayers": exportPlayersList, "onClose": () => setExportModalOpen(false)})
+      ), importPreview && (
+        React.createElement("div", {"className": "modal-bg", "onClick": (e) => { if (e.target === e.currentTarget) setImportPreview(null); }}, React.createElement("div", {"className": "modal modal-wide"}, React.createElement("div", {"className": "modal-head"}, React.createElement("h3", null, "APERÇU IMPORT"), React.createElement("button", {"className": "modal-close", "onClick": () => setImportPreview(null)}, React.createElement(X, {"size": 14}))), React.createElement("div", {"className": "modal-body"}, React.createElement("p", {"className": "opt-hint", "style": { marginBottom: 8, fontSize: 12 }}, React.createElement("strong", {"style": { color: "var(--cy-cyan)" }}, importPreview.newPlayers.length), "nouveau(x) joueur(s)."), React.createElement("p", {"className": "opt-hint", "style": { marginBottom: 14, fontSize: 12 }}, React.createElement("strong", {"style": { color: "var(--cy-pink)" }}, importPreview.conflicts.length), "joueur(s) déjà existant(s)."), importPreview.conflicts.length > 0 ? (
+                React.createElement(React.Fragment, null, React.createElement("p", {"className": "opt-hint", "style": { fontSize: 11, marginBottom: 10 }}, "Que faire des doublons ?"), React.createElement("div", {"style": { display: "flex", flexDirection: "column", gap: 8 }}, React.createElement("button", {"className": "name-btn rename", "onClick": () => importBucketAction("merge")}, "🔗 TOUT MERGER"), React.createElement("button", {"className": "name-btn rename", "onClick": () => importBucketAction("rename")}, "✎ TOUT EN NOUVEAU (#1, #2...)"), React.createElement("button", {"className": "name-btn rename-reset", "onClick": () => importBucketAction("choose")}, "⚙ CHOISIR POUR CHACUN"), React.createElement("button", {"className": "name-btn rename-reset", "onClick": () => setImportPreview(null)}, "ANNULER")))
+              ) : (
+                React.createElement("button", {"className": "name-btn rename", "onClick": () => importBucketAction("merge")}, "IMPORTER")
+              ))))
+      ), showSettings && (
+        React.createElement(SettingsModal, {"session": session, "setSession": setSession, "rooms": rooms, "setRooms": setRooms, "blindLevels": blindLevels, "setBlindLevels": setBlindLevels, "onClose": () => setShowSettings(false)})
+      ), showShowdown && (
+        React.createElement(ShowdownModal, {"hand": hand, "seats": seats, "getPlayerForSeat": getPlayerForSeat, "onClose": () => setShowShowdown(false), "onValidate": (data) => commitHand(data)})
+      ), showSessionHistory && (
+        React.createElement(SessionHistoryModal, {"history": sessionHistory, "onClose": () => setShowSessionHistory(false)})
+      ), observingPlayer && (
+        React.createElement(PlayerObserverModal, {"playerDB": playerDB, "setPlayerDB": setPlayerDB, "rooms": rooms, "selected": observingPlayer, "onSelect": setObservingPlayer, "onClose": () => setObservingPlayer(null)})
+      ))
+  );
+}
+
+/* ── Helpers used by App ── */
+
+function makeInitialSeats(n) {
+  const arr = [];
+  let randomCounter = 0;
+  for (let i = 0; i < n; i++) {
+    if (i === 0) {
+      arr.push({ playerId: "hero", isHero: true, status: "active" });
+    } else {
+      randomCounter += 1;
+      arr.push({
+        playerId: `random_${randomCounter}`,
+        isHero: false,
+        status: "active",
+      });
+    }
+  }
+  return arr;
+}
+
+// Extract the display number N from a random playerId like "random_3" → 3
+function randomNumFromId(id) {
+  if (!isRandomId(id)) return null;
+  const m = /^random_(\d+)$/.exec(id);
+  return m ? parseInt(m[1], 10) : null;
+}
+
+// Find the smallest unused random number given seats & randomPlayers keys
+function nextRandomNum(seats, randomPlayersObj = {}) {
+  const used = new Set();
+  (seats || []).forEach((s) => {
+    if (s?.playerId) {
+      const n = randomNumFromId(s.playerId);
+      if (n !== null) used.add(n);
+    }
+  });
+  Object.keys(randomPlayersObj).forEach((id) => {
+    const n = randomNumFromId(id);
+    if (n !== null) used.add(n);
+  });
+  let i = 1;
+  while (used.has(i)) i++;
+  return i;
+}
+
+// A "random" player is a temporary session-only pseudo like Random#1, Random#2, ...
+// Stats for these are session-only (not added to global), and they can't be saved to DB.
+// Normalize player name: uppercase, remove accents
+function normalizeName(name) {
+  return name
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .toUpperCase()
+    .trim();
+}
+
+function isRandomId(id) {
+  return typeof id === "string" && id.startsWith("random_");
+}
+function isRandomName(name) {
+  if (!name) return false;
+  return /^random\s*#?\s*\d*$/i.test(name.trim());
+}
+function isSeatPlayable(seat) {
+  return seat && seat.status !== "open" && seat.status !== "break";
+}
+
+function cloneHand(h) {
+  return {
+    ...h,
+    inHand: new Set(h.inHand),
+    actedSinceLastRaise: new Set(h.actedSinceLastRaise),
+    events: [...h.events],
+    posts: h.posts ? new Set(h.posts) : new Set(),
+    playerEvents: h.playerEvents.map((e) => e ? {
+      dealt: e.dealt,
+      opp: { ...e.opp },
+      act: { ...e.act },
+      postChecked: e.postChecked || false,
+    } : null),
+  };
+}
+
+function singleHandToStats(ev, position, sdCards) {
+  const out = emptyStats();
+  out.hands = 1;
+  const cards = (sdCards && sdCards.length > 0) ? sdCards.join("") : null;
+  STAT_KEYS.forEach((k) => {
+    const oppV = (ev.opp && ev.opp[k]) ? 1 : 0;
+    const actV = (ev.act && ev.act[k]) ? 1 : 0;
+    out[k] = { opp: oppV, act: actV };
+    if (actV && cards) {
+      out[k].showdowns = [cards];
+    }
+  });
+  if (position) {
+    const posStats = { hands: 1 };
+    STAT_KEYS.forEach((k) => {
+      posStats[k] = { ...out[k] };
+      if (out[k].showdowns) posStats[k].showdowns = [...out[k].showdowns];
+    });
+    out.byPos[position] = posStats;
+  }
+  return out;
+}
+
+// Subtract delta from stats (inverse of mergeStats).
+// Removes showdowns that match exactly. Does not let counts go negative.
+function subtractStats(base, delta) {
+  if (!delta) return base;
+  const out = { hands: Math.max(0, (base.hands || 0) - (delta.hands || 0)), byPos: {} };
+  STAT_KEYS.forEach((k) => {
+    const ba = base[k] || { opp: 0, act: 0 };
+    const da = delta[k] || { opp: 0, act: 0 };
+    const newK = { opp: Math.max(0, ba.opp - da.opp), act: Math.max(0, ba.act - da.act) };
+    if (ba.showdowns && da.showdowns) {
+      const remaining = [...ba.showdowns];
+      da.showdowns.forEach((sd) => {
+        const idx = remaining.indexOf(sd);
+        if (idx !== -1) remaining.splice(idx, 1);
+      });
+      if (remaining.length > 0) newK.showdowns = remaining;
+    } else if (ba.showdowns) {
+      newK.showdowns = [...ba.showdowns];
+    }
+    out[k] = newK;
+  });
+  // byPos
+  const baseBP = base.byPos || {};
+  const deltaBP = delta.byPos || {};
+  Object.keys(baseBP).forEach((pos) => {
+    const bp = baseBP[pos];
+    const dp = deltaBP[pos];
+    if (!dp) {
+      out.byPos[pos] = bp;
+      return;
+    }
+    const merged = { hands: Math.max(0, (bp.hands || 0) - (dp.hands || 0)) };
+    STAT_KEYS.forEach((k) => {
+      const bk = bp[k] || { opp: 0, act: 0 };
+      const dk = dp[k] || { opp: 0, act: 0 };
+      const mk = { opp: Math.max(0, bk.opp - dk.opp), act: Math.max(0, bk.act - dk.act) };
+      if (bk.showdowns && dk.showdowns) {
+        const remaining = [...bk.showdowns];
+        dk.showdowns.forEach((sd) => {
+          const idx = remaining.indexOf(sd);
+          if (idx !== -1) remaining.splice(idx, 1);
+        });
+        if (remaining.length > 0) mk.showdowns = remaining;
+      } else if (bk.showdowns) {
+        mk.showdowns = [...bk.showdowns];
+      }
+      merged[k] = mk;
+    });
+    // Don't drop position even if hands === 0 (preserve future merges)
+    out.byPos[pos] = merged;
+  });
+  return out;
+}
+
+// Build a one-line descriptor of a hand: "BU:RFI/SB:Fold/BB:Call"
+function buildHandDescriptor(handState, seats, playerDB, randomPlayers) {
+  if (!handState || !handState.events) return "";
+  const parts = [];
+  handState.events.forEach((ev) => {
+    const pos = handState.positions[ev.who] || "?";
+    let actLabel;
+    switch (ev.kind) {
+      case "fold": actLabel = "Fold"; break;
+      case "check": actLabel = "Check"; break;
+      case "limp": actLabel = "Limp"; break;
+      case "call": actLabel = "Call"; break;
+      case "open": actLabel = "RFI"; break;
+      case "iso": actLabel = "ISO"; break;
+      case "3bet": actLabel = "3B"; break;
+      case "sqz": actLabel = "SQZ"; break;
+      case "4bet": actLabel = "4B"; break;
+      case "5bet": actLabel = "5B"; break;
+      default: actLabel = ev.kind;
+    }
+    parts.push(`${pos}:${actLabel}`);
+  });
+  return parts.join("/");
+}
+
+/* =============================================================================
+   7. SUB-COMPONENTS
+   ========================================================================== */
+
+function Header({ tableSize, setTableSize, onResetTable, onSettings, onReorder, reorderMode, onHistory, onObserver, onExport, onImport, handStarted, sessionActive }) {
+  const [menuOpen, setMenuOpen] = useState(false);
+  return (
+    React.createElement("header", {"className": "top"}, React.createElement("div", {"className": "top-bar"}, React.createElement("div", {"className": "brand"}, React.createElement("span", {"className": "logo-mark"}, "◤"), React.createElement("h1", null, "TRCK", React.createElement("span", {"className": "accent"}, "."), "iT", React.createElement("span", {"className": "accent"}, "."))), React.createElement("div", {"className": "burger-wrap"}, React.createElement("button", {"className": "burger-btn", "onClick": () => setMenuOpen((v) => !v)}, React.createElement("span", {"className": "burger-icon"}, "☰")), menuOpen && (
+            React.createElement(React.Fragment, null, React.createElement("div", {"className": "burger-bg", "onClick": () => setMenuOpen(false)}), React.createElement("div", {"className": "burger-menu"}, React.createElement("button", {"className": "burger-item", "onClick": () => { setMenuOpen(false); onObserver(); }}, "👤 Player Observer"), React.createElement("button", {"className": "burger-item", "onClick": () => { setMenuOpen(false); onHistory(); }}, "📋 Session History"), React.createElement("div", {"className": "burger-sep"}), React.createElement("button", {"className": "burger-item", "onClick": () => { setMenuOpen(false); onExport(); }}, "💾 Export Data"), React.createElement("button", {"className": "burger-item", "onClick": () => { setMenuOpen(false); onImport(); }}, "📂 Import Data")))
+          ))), sessionActive && (
+        React.createElement("div", {"className": "controls"}, React.createElement("label", {"className": `ctrl ${handStarted ? "disabled" : ""}`}, React.createElement("span", {"style": { fontSize: 10 }}, "👥"), React.createElement("select", {"value": tableSize, "onChange": (e) => setTableSize(+e.target.value), "disabled": handStarted}, [2,3,4,5,6,7,8,9].map(n => React.createElement("option", {"key": n, "value": n}, n, "P")))), React.createElement("button", {"className": `btn btn-label ${reorderMode ? "on" : ""}`, "onClick": onReorder, "disabled": handStarted, "title": "Réordonner"}, React.createElement(ArrowUpDown, {"size": 11}), "REORDER"), React.createElement("button", {"className": "btn btn-label", "onClick": onResetTable, "disabled": handStarted, "title": "Reset table"}, React.createElement(RefreshCw, {"size": 11}), "TABLE"), React.createElement("button", {"className": "btn", "onClick": onSettings, "title": "Réglages"}, React.createElement(Settings, {"size": 12})))
+      ), !sessionActive && (
+        React.createElement("div", {"className": "controls"}, React.createElement("button", {"className": "btn", "onClick": onSettings, "title": "Réglages"}, React.createElement(Settings, {"size": 12})))
+      ))
+  );
+}
+
+function HandControls({ onUndo, canUndo, onResetHand, straddle, mississippi, onToggleStraddle, onToggleMississippi, handStarted }) {
+  return (
+    React.createElement("div", {"className": "hand-controls"}, React.createElement("div", {"className": "hc-toggles"}, React.createElement("button", {"className": `hc-tog ${straddle && !mississippi ? "on" : ""}`, "onClick": onToggleStraddle, "disabled": handStarted, "title": "Straddle (UTG)"}, "STR"), React.createElement("button", {"className": `hc-tog ${mississippi ? "on" : ""}`, "onClick": onToggleMississippi, "disabled": handStarted, "title": "Mississippi (BU)"}, "MSP")), React.createElement("div", {"className": "hc-actions"}, React.createElement("button", {"className": "hc-btn", "onClick": onUndo, "disabled": !canUndo, "title": "Annuler dernière action"}, React.createElement(Undo2, {"size": 12}), "UNDO"), React.createElement("button", {"className": "hc-btn", "onClick": onResetHand, "disabled": !handStarted, "title": "Réinitialiser la main en cours"}, React.createElement(RotateCcw, {"size": 12}), "RESET")))
+  );
+}
+
+function StatusBar({ hand, session, elapsed, onCommit, onShowdown, onEndSession }) {
+  const closed = hand.closed;
+  const aliveCount = hand.inHand.size;
+  return (
+    React.createElement("div", {"className": "status-bar"}, React.createElement("div", {"className": "sb-info"}, React.createElement("div", {"className": "status-item"}, React.createElement("span", {"className": "st-l"}, "ROOM"), React.createElement("span", {"className": "st-v"}, session.room || "—")), React.createElement("div", {"className": "status-item"}, React.createElement("span", {"className": "st-l"}, "BLIND"), React.createElement("span", {"className": "st-v"}, session.blind || "—")), React.createElement("div", {"className": "status-item"}, React.createElement("span", {"className": "st-l"}, "SESS"), React.createElement("span", {"className": "st-v"}, "#", session.id)), React.createElement("div", {"className": "status-item"}, React.createElement("span", {"className": "st-l"}, "HANDS"), React.createElement("span", {"className": "st-v"}, session.handCount)), React.createElement("div", {"className": "status-item"}, React.createElement("span", {"className": "st-l"}, "TIME"), React.createElement("span", {"className": "st-v"}, elapsed)), React.createElement("button", {"className": "status-end", "onClick": onEndSession}, "END")), closed && (
+        React.createElement("div", {"className": "sb-actions"}, React.createElement("button", {"className": "next-hand showdown-btn", "onClick": onShowdown}, "SD"), React.createElement("button", {"className": "next-hand", "onClick": onCommit}, "NEXT", React.createElement(ChevronRight, {"size": 14})))
+      ))
+  );
+}
+
+function BTNPlacer({ seats, btnSeatIdx, setBtnSeatIdx }) {
+  const heroIdx = seats.findIndex((s) => s && s.isHero);
+  // Labels: Hero=H, others=1..N in the order they appear (excluding Hero)
+  let counter = 0;
+  const labels = seats.map((s, i) => {
+    if (s && s.isHero) return "H";
+    counter += 1;
+    return String(counter);
+  });
+  return (
+    React.createElement("div", {"className": "btn-placer"}, React.createElement("span", {"className": "bp-lbl"}, "BTN →"), seats.map((s, i) => {
+        const inactive = !isSeatPlayable(s);
+        return (
+          React.createElement("button", {"key": i, "className": `bp-dot ${i === btnSeatIdx ? "on" : ""} ${inactive ? "muted" : ""}`, "onClick": () => !inactive && setBtnSeatIdx(i), "disabled": inactive}, labels[i])
+        );
+      }))
+  );
+}
+
+function PlayerList({
+  hand, seats, getPlayerForSeat, onAction,
+  onStartEdit, onSetSeatStatus, onTogglePost,
+  reorderMode, moveSeat, canReorder,
+}) {
+  const heroSeatIdx = seats.findIndex((s) => s && s.isHero);
+  const others = seats.map((_, i) => i).filter((i) => i !== heroSeatIdx);
+  const renderOrder = heroSeatIdx !== -1 ? [heroSeatIdx, ...others] : others;
+
+  // Swap state: swapFrom = seatIdx of the first player selected for swap
+  const [swapFrom, setSwapFrom] = useState(null);
+
+  const handleSwapClick = (seatIdx) => {
+    if (!canReorder) return;
+    if (seats[seatIdx]?.isHero) return;
+    if (swapFrom === null) {
+      // First tap: select this seat
+      setSwapFrom(seatIdx);
+    } else if (swapFrom === seatIdx) {
+      // Tap same seat: cancel
+      setSwapFrom(null);
+    } else {
+      // Second tap: swap and done
+      moveSeat(swapFrom, seatIdx);
+      setSwapFrom(null);
+    }
+  };
+
+  // Cancel swap when leaving reorder mode
+  useEffect(() => { if (!reorderMode) setSwapFrom(null); }, [reorderMode]);
+
+  return (
+    React.createElement("section", {"className": "player-list"}, renderOrder.map((seatIdx, visualOrder) => {
+        const seat = seats[seatIdx];
+        if (!seat) return null;
+        const player = getPlayerForSeat(seatIdx);
+        if (!player) return null;
+        const pos = hand.positions[seatIdx];
+        const seatLabel = seat.isHero ? "H" : String(visualOrder);
+
+        const folded = !hand.inHand.has(seatIdx) && hand.events.some(e => e.who === seatIdx);
+        const allActions = hand.events.filter(e => e.who === seatIdx);
+        const hasActedSinceLastRaise = hand.actedSinceLastRaise.has(seatIdx);
+        const canAct = !hand.closed && !folded && hand.inHand.has(seatIdx) && !hasActedSinceLastRaise;
+        const situation = canAct ? getSituationFor(hand, seatIdx) : null;
+
+        const isSwapFrom = swapFrom === seatIdx;
+        const isSwapTarget = swapFrom !== null && swapFrom !== seatIdx && !seat.isHero;
+        const isPosted = hand.posts && hand.posts.has(seatIdx);
+
+        return (
+          React.createElement(PlayerRow, {"key": `seat-${seatIdx}`, "seatIdx": seatIdx, "seatLabel": seatLabel, "player": player, "pos": pos, "isHero": seat.isHero, "folded": folded, "allActions": allActions, "situation": situation, "hasActedSinceLastRaise": hasActedSinceLastRaise, "handClosed": hand.closed, "seatStatus": seat.status || "active", "isPosted": isPosted, "onAction": (t) => onAction(seatIdx, t), "onStartEdit": () => onStartEdit(seatIdx), "onSeatOpen": () => onSetSeatStatus(seatIdx, "open"), "onBreak": () => onSetSeatStatus(seatIdx, "break"), "onActivate": () => onSetSeatStatus(seatIdx, "active"), "onTogglePost": () => onTogglePost(seatIdx), "canTogglePost": hand.events.length === 0, "reorderMode": reorderMode, "canReorder": canReorder, "isSwapFrom": isSwapFrom, "isSwapTarget": isSwapTarget, "onSwapClick": () => handleSwapClick(seatIdx)})
+        );
+      }), swapFrom !== null && (
+        React.createElement("div", {"className": "swap-hint"}, "Tape un autre siège pour intervertir")
+      ))
+  );
+}
+
+function PlayerRow({
+  seatIdx, seatLabel, player, pos, isHero, folded, allActions, situation,
+  hasActedSinceLastRaise, handClosed, seatStatus, isPosted,
+  onAction, onStartEdit, onSeatOpen, onBreak, onActivate,
+  onTogglePost, canTogglePost,
+  reorderMode, canReorder,
+  isSwapFrom, isSwapTarget, onSwapClick,
+}) {
+  const [menuOpen, setMenuOpen] = useState(false);
+  const isOpen = seatStatus === "open";
+  const isBreak = seatStatus === "break";
+  const inactive = isOpen || isBreak;
+  const hasActions = allActions && allActions.length > 0;
+
+  return (
+    React.createElement("div", {"data-seat": seatIdx, "className": `row ${isHero ? "hero" : ""} ${folded ? "folded" : ""} ${situation ? "can-act" : ""} ${isOpen ? "seat-open" : ""} ${isBreak ? "seat-break" : ""} ${isSwapFrom ? "swap-from" : ""} ${isSwapTarget ? "swap-target" : ""}`, "onClick": reorderMode && canReorder && (isSwapTarget || (!isHero && !isSwapFrom)) ? onSwapClick : undefined}, React.createElement("div", {"className": "row-left"}, React.createElement("div", {"className": "row-pos"}, React.createElement("span", {"className": `pos-name pos-${(pos || "").toLowerCase().replace(/[^a-z]/g, "")}`}, inactive ? "—" : (pos || "?")), React.createElement("span", {"className": "seat-id"}, seatLabel)), React.createElement("div", {"className": "row-info"}, React.createElement("button", {"className": `row-name ${isHero ? "hero-name" : ""} ${player?.isRandom ? "random-name" : ""} ${inactive ? "inactive-name" : ""}`, "onClick": reorderMode ? undefined : (isHero ? undefined : onStartEdit)}, player?.name || "?"), isOpen && React.createElement("span", {"className": "row-tag-inline tag-color-seatopen"}, "SEAT OPEN"), isBreak && React.createElement("span", {"className": "row-tag-inline tag-color-break"}, "BREAK"), isPosted && !inactive && React.createElement("span", {"className": "row-tag-inline tag-color-post"}, "POST"), !inactive && hasActions && !reorderMode && (
+            React.createElement("div", {"className": "row-actions-history"}, allActions.map((ev, i) => (
+                React.createElement("span", {"key": i, "className": `action-label action-${ev.kind}`}, ACTION_LABELS[ev.kind] || ev.kind.toUpperCase())
+              )))
+          ))), React.createElement("div", {"className": "row-right"}, reorderMode ? (
+          isHero ? (
+            React.createElement("span", {"className": "row-status"}, "hero")
+          ) : !canReorder ? (
+            React.createElement("span", {"className": "row-status muted"}, "locked")
+          ) : isSwapFrom ? (
+            React.createElement("span", {"className": "row-status swap-label"}, "SELECTED")
+          ) : (
+            React.createElement("span", {"className": "row-status swap-label-target"}, "TAP")
+          )
+        ) : inactive ? (
+          React.createElement("button", {"className": "act act-neutral", "onClick": onActivate}, "← ACTIVE")
+        ) : situation ? (
+          menuOpen ? (
+            React.createElement("div", {"className": "act-row"}, React.createElement("button", {"className": "act act-mute", "onClick": () => setMenuOpen(false)}, React.createElement(X, {"size": 10})), React.createElement("button", {"className": "act act-danger", "onClick": () => { setMenuOpen(false); onSeatOpen(); }}, "OPEN"), React.createElement("button", {"className": "act act-warn", "onClick": () => { setMenuOpen(false); onBreak(); }}, "BREAK"), canTogglePost && (
+                React.createElement("button", {"className": `act ${isPosted ? "act-accent" : "act-neutral"}`, "onClick": () => { setMenuOpen(false); onTogglePost(); }}, isPosted ? "UNPOST" : "POST")
+              ))
+          ) : (
+            React.createElement(React.Fragment, null, React.createElement("div", {"className": "act-row"}, situation.actions.map((a) => (
+                  React.createElement("button", {"key": a.type, "className": `act act-${a.tone}`, "onClick": () => onAction(a.type)}, a.label)
+                ))), !isHero && (
+                React.createElement("button", {"className": "row-menu-btn", "onClick": () => setMenuOpen(true), "title": "Seat open / break"}, "⋮")
+              ))
+          )
+        ) : folded ? (
+          React.createElement("span", {"className": "row-status muted"}, "—")
+        ) : hasActedSinceLastRaise && !handClosed ? (
+          React.createElement("span", {"className": "row-status"}, "wait")
+        ) : null))
+  );
+}
+
+function NameModal({
+  currentName, playerDB, seats, onPick, onCreate, onRename, onClose,
+  mode, // "assign" | "rename"
+}) {
+  const [text, setText] = useState(currentName || "");
+  const inputRef = useRef(null);
+
+  // IDs of players already seated at the table
+  const seatedIds = useMemo(() => {
+    const ids = new Set();
+    (seats || []).forEach((s) => { if (s?.playerId && !isRandomId(s.playerId)) ids.add(s.playerId); });
+    return ids;
+  }, [seats]);
+
+  useEffect(() => {
+    const t = setTimeout(() => {
+      inputRef.current?.focus();
+      inputRef.current?.select();
+    }, 60);
+    return () => clearTimeout(t);
+  }, []);
+
+  const matches = useMemo(() => {
+    const q = normalizeName(text);
+    const pool = playerDB.filter((p) => p.id !== "hero");
+    if (!q) return pool.slice(0, 30);
+    return pool
+      .filter((p) => normalizeName(p.name).includes(q))
+      .slice(0, 30);
+  }, [text, playerDB]);
+
+  const normalized = normalizeName(text);
+  const exactMatch = playerDB.find(
+    (p) => p.id !== "hero" && normalizeName(p.name) === normalized
+  );
+
+  const handleSubmit = (e) => {
+    e?.preventDefault?.();
+    if (!normalized) return onClose();
+    if (exactMatch && !seatedIds.has(exactMatch.id)) onPick(exactMatch.id);
+    else if (!exactMatch) onCreate(normalized);
+  };
+
+  const handleCreate = () => {
+    if (!normalized) return;
+    onCreate(normalized);
+  };
+
+  const handleRenameKeep = () => {
+    if (!normalized || !onRename) return;
+    onRename(normalized, true);
+  };
+
+  const handleRenameReset = () => {
+    if (!normalized || !onRename) return;
+    onRename(normalized, false);
+  };
+
+  return (
+    React.createElement("div", {"className": "modal-bg", "onClick": (e) => {
+      if (e.target === e.currentTarget) onClose();
+    }}, React.createElement("div", {"className": "modal name-modal", "onClick": (e) => e.stopPropagation()}, React.createElement("div", {"className": "modal-head"}, React.createElement("h3", null, mode === "rename" ? "RENOMMER" : "CHOISIR JOUEUR"), React.createElement("button", {"className": "modal-close", "onClick": onClose}, React.createElement(X, {"size": 14}))), React.createElement("form", {"className": "modal-body", "onSubmit": handleSubmit}, React.createElement("input", {"ref": inputRef, "className": "name-input", "value": text, "onChange": (e) => setText(e.target.value), "placeholder": "nom du joueur...", "maxLength": 20, "autoComplete": "off", "autoCorrect": "off", "autoCapitalize": "off", "spellCheck": "false"}), React.createElement("div", {"className": "name-actions"}, mode === "rename" && exactMatch && normalizeName(exactMatch.name) === normalized ? null : normalized && !exactMatch ? (
+              React.createElement("button", {"type": "button", "className": "name-btn create", "onClick": handleCreate}, React.createElement(Plus, {"size": 14}), "CRÉER \"", normalized, "\"")
+            ) : null, mode === "rename" && normalized && normalized !== normalizeName(currentName) && (
+              React.createElement(React.Fragment, null, React.createElement("button", {"type": "button", "className": "name-btn rename", "onClick": handleRenameKeep}, "REMPLACER (garder stats session)"), React.createElement("button", {"type": "button", "className": "name-btn rename-reset", "onClick": handleRenameReset}, "REMPLACER (fresh)"))
+            )), mode === "assign" && (
+            React.createElement(React.Fragment, null, React.createElement("div", {"className": "name-divider"}, React.createElement("span", null, matches.length > 0 ? "JOUEURS EXISTANTS" : "AUCUN JOUEUR")), React.createElement("div", {"className": "name-list"}, matches.map((p) => {
+                  const isSeated = seatedIds.has(p.id);
+                  return (
+                    React.createElement("button", {"key": p.id, "type": "button", "className": `name-item ${isSeated ? "name-item-seated" : ""}`, "onClick": () => !isSeated && onPick(p.id), "disabled": isSeated}, React.createElement("span", {"className": "ni-name"}, p.name), isSeated && React.createElement("span", {"className": "ni-seated"}, "À TABLE"), React.createElement("span", {"className": "ni-meta"}, (p.globalStats || emptyStats()).hands, "mains"))
+                  );
+                }), matches.length === 0 && !normalized && (
+                  React.createElement("div", {"className": "name-empty"}, "Base vide. Tape un nom pour créer le premier joueur.")
+                )))
+          ))))
+  );
+}
+
+const DEFAULT_STATS_COLS = ["vpip", "pfr", "rfi", "threeBet", "sqz"];
+const POSITION_ORDER = ["BU", "CO", "HJ", "MP", "U2", "U1", "U0", "U-1", "SB", "BB", "STR", "MSP"];
+
+function TableAveragesBar({ seats, getPlayerForSeat, session, elapsed }) {
+  // Compute averages across all seated players (real + random) with sessionStats.hands > 0
+  let vpipSum = 0, vpipCount = 0;
+  let pfrSum = 0, pfrCount = 0;
+  let threeBSum = 0, threeBCount = 0;
+  seats.forEach((s, idx) => {
+    if (!s || !s.playerId) return;
+    if (s.status === "open" || s.status === "break") return;
+    const p = getPlayerForSeat(idx);
+    if (!p) return;
+    const st = p.sessionStats || emptyStats();
+    if ((st.hands || 0) === 0) return;
+    if ((st.vpip?.opp || 0) > 0) {
+      vpipSum += (st.vpip.act / st.vpip.opp) * 100;
+      vpipCount++;
+    }
+    if ((st.pfr?.opp || 0) > 0) {
+      pfrSum += (st.pfr.act / st.pfr.opp) * 100;
+      pfrCount++;
+    }
+    if ((st.threeBet?.opp || 0) > 0) {
+      threeBSum += (st.threeBet.act / st.threeBet.opp) * 100;
+      threeBCount++;
+    }
+  });
+  const avgVpip = vpipCount > 0 ? Math.round(vpipSum / vpipCount) : null;
+  const avgPfr = pfrCount > 0 ? Math.round(pfrSum / pfrCount) : null;
+  const avg3B = threeBCount > 0 ? Math.round(threeBSum / threeBCount) : null;
+
+  // Hands per hour
+  let handsPerHour = null;
+  if (session && session.startTime && session.handCount > 0) {
+    const elapsedSec = (Date.now() - session.startTime) / 1000;
+    if (elapsedSec > 60) {
+      handsPerHour = Math.round((session.handCount / elapsedSec) * 3600);
+    }
+  }
+
+  return (
+    React.createElement("div", {"className": "table-avg-bar"}, React.createElement("div", {"className": "table-avg-cell"}, React.createElement("span", {"className": "ta-l"}, "VPIP"), React.createElement("span", {"className": "ta-v"}, avgVpip !== null ? `${avgVpip}` : "—")), React.createElement("div", {"className": "table-avg-cell"}, React.createElement("span", {"className": "ta-l"}, "PFR"), React.createElement("span", {"className": "ta-v"}, avgPfr !== null ? `${avgPfr}` : "—")), React.createElement("div", {"className": "table-avg-cell"}, React.createElement("span", {"className": "ta-l"}, "3B"), React.createElement("span", {"className": "ta-v"}, avg3B !== null ? `${avg3B}` : "—")), React.createElement("div", {"className": "table-avg-cell"}, React.createElement("span", {"className": "ta-l"}, "H/H"), React.createElement("span", {"className": "ta-v"}, handsPerHour !== null ? `${handsPerHour}` : "—")))
+  );
+}
+
+function SessionHandLog({ log, onDelete }) {
+  const [confirmDelete, setConfirmDelete] = useState(null);
+
+  return (
+    React.createElement("div", {"className": "hand-log"}, React.createElement("div", {"className": "hand-log-head"}, "HAND LOG (", log.length, ")"), React.createElement("div", {"className": "hand-log-list"}, log.map((entry, idx) => {
+          const isConfirm = confirmDelete === entry.id;
+          return (
+            React.createElement("div", {"key": entry.id, "className": "hand-log-row"}, React.createElement("span", {"className": "hand-log-num"}, "#", idx + 1), React.createElement("span", {"className": "hand-log-desc", "title": entry.descriptor}, entry.descriptor || "—"), isConfirm ? (
+                React.createElement(React.Fragment, null, React.createElement("button", {"className": "hand-log-confirm", "onClick": () => { onDelete(entry.id); setConfirmDelete(null); }}, "DELETE"), React.createElement("button", {"className": "hand-log-cancel", "onClick": () => setConfirmDelete(null)}, "CANCEL"))
+              ) : (
+                React.createElement("button", {"className": "hand-log-trash", "onClick": () => setConfirmDelete(entry.id), "title": "Supprimer"}, React.createElement(Trash2, {"size": 11}))
+              ))
+          );
+        })))
+  );
+}
+
+function StatsTable({ seats, getPlayerForSeat, view, setView, onResetSession, session, elapsed }) {
+  const [fullTable, setFullTable] = useState(false);
+  const [drillCell, setDrillCell] = useState(null);
+
+  const heroSeatIdx = seats.findIndex((s) => s && s.isHero);
+  const others = seats.map((_, i) => i).filter((i) => i !== heroSeatIdx);
+  const orderedIdx = heroSeatIdx !== -1 ? [heroSeatIdx, ...others] : others;
+
+  const rows = orderedIdx
+    .map((i) => {
+      const p = getPlayerForSeat(i);
+      if (!p) return null;
+      const seat = seats[i];
+      if (seat.status === "open") return null;
+      return { ...p, seatIdx: i, isHero: seat.isHero };
+    })
+    .filter(Boolean)
+    .filter((r) => view === "session" || !r.isRandom);
+
+  const cols = fullTable ? STAT_KEYS : DEFAULT_STATS_COLS;
+  const gridCols = `90px 36px repeat(${cols.length}, 1fr)`;
+
+  // Compute table averages for session active mode
+  const tableAvg = (() => {
+    if (!session?.active || view !== "session") return null;
+    const playersWithHands = rows.filter(r => (r.sessionStats?.hands || 0) > 0);
+    if (playersWithHands.length === 0) return null;
+    const avg = (key) => {
+      const vals = [];
+      playersWithHands.forEach(r => {
+        const s = r.sessionStats?.[key];
+        if (s && s.opp > 0) vals.push((s.act / s.opp) * 100);
+      });
+      if (vals.length === 0) return null;
+      return Math.round(vals.reduce((a,b) => a+b, 0) / vals.length);
+    };
+    // hands/h
+    let handsPerHour = null;
+    if (session.handCount > 0 && session.startTime) {
+      const elapsedSec = (Date.now() - session.startTime) / 1000;
+      if (elapsedSec > 60) {
+        handsPerHour = Math.round((session.handCount / elapsedSec) * 3600);
+      }
+    }
+    return {
+      vpip: avg("vpip"),
+      pfr: avg("pfr"),
+      threeBet: avg("threeBet"),
+      handsPerHour,
+    };
+  })();
+
+  const toggleDrill = (playerId, statKey) => {
+    setDrillCell((prev) =>
+      prev && prev.playerId === playerId && prev.statKey === statKey
+        ? null
+        : { playerId, statKey }
+    );
+  };
+
+  return (
+    React.createElement("section", {"className": "stats"}, tableAvg && (
+        React.createElement("div", {"className": "table-avg-bar"}, React.createElement("div", {"className": "table-avg-item"}, React.createElement("span", {"className": "table-avg-label"}, "VPIP"), React.createElement("span", {"className": "table-avg-val"}, tableAvg.vpip ?? "—")), React.createElement("div", {"className": "table-avg-item"}, React.createElement("span", {"className": "table-avg-label"}, "PFR"), React.createElement("span", {"className": "table-avg-val"}, tableAvg.pfr ?? "—")), React.createElement("div", {"className": "table-avg-item"}, React.createElement("span", {"className": "table-avg-label"}, "3B"), React.createElement("span", {"className": "table-avg-val"}, tableAvg.threeBet ?? "—")), React.createElement("div", {"className": "table-avg-item"}, React.createElement("span", {"className": "table-avg-label"}, "H/H"), React.createElement("span", {"className": "table-avg-val"}, tableAvg.handsPerHour ?? "—")))
+      ), React.createElement("div", {"className": "stats-head"}, React.createElement("h2", null, "STATS"), React.createElement("div", {"className": "stats-toggle"}, React.createElement("button", {"className": `tog ${view === "session" ? "on" : ""}`, "onClick": () => setView("session")}, "SESSION"), React.createElement("button", {"className": `tog ${view === "global" ? "on" : ""}`, "onClick": () => setView("global")}, "GLOBAL"), React.createElement("button", {"className": `tog ${fullTable ? "on" : ""}`, "onClick": () => setFullTable((f) => !f)}, "FULL"))), React.createElement("div", {"className": "stats-scroll"}, React.createElement("div", {"className": "stats-grid", "style": { gridTemplateColumns: gridCols }}, React.createElement("div", {"className": "sh"}, "PLAYER"), React.createElement("div", {"className": "sh"}, "N"), cols.map((k) => (
+            React.createElement("div", {"key": k, "className": "sh"}, STAT_LABELS[k] || k)
+          )), rows.map((p) => {
+            const v = view === "session" ? p.sessionStats : p.globalStats;
+            if (!v) return null;
+            const isDrilled = drillCell && drillCell.playerId === p.id;
+            return (
+              React.createElement(React.Fragment, {"key": p.id}, React.createElement("div", {"className": `sc name ${p.isHero ? "hero-row" : ""} ${p.isRandom ? "random-row" : ""}`}, p.name), React.createElement("div", {"className": "sc dim mono"}, v.hands || 0), cols.map((k) => {
+                  const s = v[k] || { opp: 0, act: 0 };
+                  const isActive = isDrilled && drillCell.statKey === k;
+                  return (
+                    React.createElement(StatCell, {"key": k, "s": s, "kind": k, "active": isActive, "onClick": () => toggleDrill(p.id, k)})
+                  );
+                }), isDrilled && (() => {
+                  const byPos = v.byPos || {};
+                  const sk = drillCell.statKey;
+                  const showSDPos = drillCell.showSDPos || null;
+                  const toggleSD = (pos) => setDrillCell((prev) => ({
+                    ...prev,
+                    showSDPos: prev.showSDPos === pos ? null : pos,
+                  }));
+                  return (
+                    React.createElement("div", {"className": "drill-row", "style": { gridColumn: `1 / -1` }}, React.createElement("div", {"className": "drill-row-head"}, React.createElement("span", null, p.name, "—", STAT_LABELS[sk] || sk), React.createElement("button", {"className": "drill-close", "onClick": () => setDrillCell(null)}, React.createElement(X, {"size": 10}))), React.createElement("div", {"className": "drill-row-cols"}, POSITION_ORDER.map((pos) => {
+                          const posData = byPos[pos];
+                          const ps = posData?.[sk] || { opp: 0, act: 0 };
+                          const hasData = posData && posData.hands > 0;
+                          const val = !hasData || ps.opp === 0 ? null : pct(ps.opp, ps.act);
+                          const sds = ps.showdowns || [];
+                          const hasSD = sds.length > 0;
+                          return (
+                            React.createElement("div", {"key": pos, "className": `drill-col ${hasSD ? "drill-col-sd" : ""}`, "onClick": hasSD ? () => toggleSD(pos) : undefined}, React.createElement("span", {"className": "drill-col-pos"}, pos), React.createElement("span", {"className": "drill-col-val", "style": { color: val === null ? "var(--dim)" : statColor(val, sk) }}, val === null ? "NA" : `${val}`), React.createElement("span", {"className": "drill-col-frac"}, hasData ? `${ps.act}/${ps.opp}` : "—"), hasSD && React.createElement("span", {"className": "drill-sd-badge"}, "🃏", sds.length), showSDPos === pos && (
+                                React.createElement("div", {"className": "drill-sd-list"}, sds.map((h, i) => React.createElement("span", {"key": i, "className": "drill-sd-hand"}, h)))
+                              ))
+                          );
+                        })))
+                  );
+                })())
+            );
+          }))), React.createElement("div", {"className": "stats-footer"}, React.createElement("button", {"className": "reset-link", "onClick": onResetSession}, "reset session")))
+  );
+}
+
+function StatCell({ s, kind, active, onClick }) {
+  if (!s) return React.createElement("div", {"className": "sc"}, React.createElement("span", {"className": "sc-val", "style": { color: "var(--dim)" }}, "—"));
+  const v = pct(s.opp, s.act);
+  return (
+    React.createElement("div", {"className": `sc sc-clickable ${active ? "sc-active" : ""}`, "onClick": onClick}, React.createElement("span", {"className": "sc-val", "style": { color: statColor(v, kind) }}, fmt(v)), React.createElement("span", {"className": "sc-frac"}, s.act, "/", s.opp))
+  );
+}
+
+function SettingsModal({
+  session, setSession, rooms, setRooms, blindLevels, setBlindLevels, onClose,
+}) {
+  const [newRoom, setNewRoom] = useState("");
+  const [newBlind, setNewBlind] = useState("");
+  const locked = session.active; // Can't change room/blind during active session
+
+  const addRoom = () => {
+    const t = newRoom.trim();
+    if (t && !rooms.includes(t)) {
+      setRooms([...rooms, t]);
+      setSession((s) => ({ ...s, room: t })); // auto-select
+      setNewRoom("");
+    }
+  };
+  const addBlind = () => {
+    const t = newBlind.trim();
+    if (t && !blindLevels.includes(t)) {
+      setBlindLevels([...blindLevels, t]);
+      setSession((s) => ({ ...s, blind: t })); // auto-select
+      setNewBlind("");
+    }
+  };
+
+  return (
+    React.createElement("div", {"className": "modal-bg", "onClick": (e) => {
+      if (e.target === e.currentTarget) onClose();
+    }}, React.createElement("div", {"className": "modal modal-wide"}, React.createElement("div", {"className": "modal-head"}, React.createElement("h3", null, "SETTINGS"), React.createElement("button", {"className": "modal-close", "onClick": onClose}, React.createElement(X, {"size": 14}))), React.createElement("div", {"className": "modal-body", "style": { maxHeight: "70vh", overflowY: "auto" }}, locked && (
+            React.createElement("p", {"className": "opt-hint", "style": { color: "var(--cy-yellow)", marginBottom: 10 }}, "Session en cours — room et blind verrouillés.")
+          ), React.createElement("div", {"className": "settings-section"}, React.createElement("span", {"className": "ss-label"}, "ROOM"), React.createElement("div", {"className": "ss-chips"}, rooms.map((r) => (
+                React.createElement("div", {"key": r, "className": "ss-chip-wrap"}, React.createElement("button", {"className": `ss-chip ${session.room === r ? "on" : ""}`, "onClick": () => !locked && setSession((s) => ({ ...s, room: r })), "disabled": locked}, r), !locked && (
+                    React.createElement("button", {"className": "ss-chip-del", "onClick": () => {
+                      setRooms((prev) => prev.filter((x) => x !== r));
+                      if (session.room === r) setSession((s) => ({ ...s, room: "" }));
+                    }}, React.createElement(X, {"size": 8}))
+                  ))
+              ))), !locked && (
+              React.createElement("div", {"className": "ss-add-row"}, React.createElement("input", {"className": "ss-input", "placeholder": "New room...", "value": newRoom, "onChange": (e) => setNewRoom(e.target.value), "onKeyDown": (e) => e.key === "Enter" && addRoom()}), React.createElement("button", {"className": "ss-add-btn", "onClick": addRoom}, React.createElement(Plus, {"size": 12})))
+            )), React.createElement("div", {"className": "settings-section"}, React.createElement("span", {"className": "ss-label"}, "BLIND"), React.createElement("div", {"className": "ss-chips"}, blindLevels.map((b) => (
+                React.createElement("div", {"key": b, "className": "ss-chip-wrap"}, React.createElement("button", {"className": `ss-chip ${session.blind === b ? "on" : ""}`, "onClick": () => !locked && setSession((s) => ({ ...s, blind: b })), "disabled": locked}, b), !locked && (
+                    React.createElement("button", {"className": "ss-chip-del", "onClick": () => {
+                      setBlindLevels((prev) => prev.filter((x) => x !== b));
+                      if (session.blind === b) setSession((s) => ({ ...s, blind: "" }));
+                    }}, React.createElement(X, {"size": 8}))
+                  ))
+              ))), !locked && (
+              React.createElement("div", {"className": "ss-add-row"}, React.createElement("input", {"className": "ss-input", "placeholder": "New blind...", "value": newBlind, "onChange": (e) => setNewBlind(e.target.value), "onKeyDown": (e) => e.key === "Enter" && addBlind()}), React.createElement("button", {"className": "ss-add-btn", "onClick": addBlind}, React.createElement(Plus, {"size": 12})))
+            ))), React.createElement("div", {"className": "modal-foot"}, React.createElement("button", {"className": "next-hand", "onClick": onClose, "style": { animation: "none", width: "100%" }}, "VALIDER"))))
+  );
+}
+
+function ShowdownModal({ hand, seats, getPlayerForSeat, onClose, onValidate }) {
+  const survivors = [...hand.inHand];
+  const [cards, setCards] = useState({}); // { seatIdx: ["As", "Kh"], ... }
+  const [pickingFor, setPickingFor] = useState(null); // seatIdx or null
+
+  const RANKS = ["A","K","Q","J","T","9","8","7","6","5","4","3","2"];
+  const SUITS = [
+    { key: "s", symbol: "♠", color: "#eee" },
+    { key: "h", symbol: "♥", color: "#ff4d6a" },
+    { key: "d", symbol: "♦", color: "#4da6ff" },
+    { key: "c", symbol: "♣", color: "#50d860" },
+  ];
+
+  // Cards already picked (by any player)
+  const usedCards = new Set();
+  Object.values(cards).forEach((arr) => arr.forEach((c) => usedCards.add(c)));
+
+  const toggleCard = (card) => {
+    if (pickingFor === null) return;
+    const curr = cards[pickingFor] || [];
+    if (curr.includes(card)) {
+      setCards({ ...cards, [pickingFor]: curr.filter((c) => c !== card) });
+    } else if (curr.length < 2) {
+      const next = [...curr, card];
+      setCards({ ...cards, [pickingFor]: next });
+      if (next.length === 2) setPickingFor(null); // auto-close picker after 2 cards
+    }
+  };
+
+  return (
+    React.createElement("div", {"className": "modal-bg", "onClick": (e) => {
+      if (e.target === e.currentTarget) onClose();
+    }}, React.createElement("div", {"className": "modal modal-wide"}, React.createElement("div", {"className": "modal-head"}, React.createElement("h3", null, "SHOWDOWN"), React.createElement("button", {"className": "modal-close", "onClick": onClose}, React.createElement(X, {"size": 14}))), React.createElement("div", {"className": "modal-body"}, survivors.map((seatIdx) => {
+            const player = getPlayerForSeat(seatIdx);
+            const pos = hand.positions[seatIdx];
+            const playerCards = cards[seatIdx] || [];
+            const isPicking = pickingFor === seatIdx;
+            return (
+              React.createElement("div", {"key": seatIdx, "className": `sd-row ${isPicking ? "sd-active" : ""}`}, React.createElement("div", {"className": "sd-name"}, React.createElement("span", {"className": "sd-pos"}, pos), React.createElement("span", null, player?.name || "?")), React.createElement("div", {"className": "sd-cards"}, playerCards.map((c, i) => (
+                    React.createElement("span", {"key": i, "className": "sd-card-badge", "onClick": () => {
+                      setCards({ ...cards, [seatIdx]: playerCards.filter((_, j) => j !== i) });
+                    }}, c[0], React.createElement("span", {"style": { color: SUITS.find(s => s.key === c[1])?.color }}, SUITS.find(s => s.key === c[1])?.symbol))
+                  )), playerCards.length < 2 && (
+                    React.createElement("button", {"className": "sd-pick-btn", "onClick": () => setPickingFor(isPicking ? null : seatIdx)}, isPicking ? "✕" : "+")
+                  )))
+            );
+          }), pickingFor !== null && (
+            React.createElement("div", {"className": "card-picker"}, SUITS.map((suit) => (
+                React.createElement("div", {"key": suit.key, "className": "cp-suit-row"}, RANKS.map((rank) => {
+                    const card = rank + suit.key;
+                    const used = usedCards.has(card) && !(cards[pickingFor] || []).includes(card);
+                    const selected = (cards[pickingFor] || []).includes(card);
+                    return (
+                      React.createElement("button", {"key": card, "className": `cp-card ${selected ? "selected" : ""} ${used ? "used" : ""}`, "style": { color: suit.color }, "onClick": () => !used && toggleCard(card), "disabled": used}, React.createElement("span", {"className": "cp-rank"}, rank), React.createElement("span", {"className": "cp-suit"}, suit.symbol))
+                    );
+                  }))
+              )))
+          )), React.createElement("div", {"className": "modal-foot"}, React.createElement("button", {"className": "btn", "onClick": onClose}, "annuler"), React.createElement("button", {"className": "next-hand", "onClick": () => onValidate(cards)}, "VALIDER & NEXT"))))
+  );
+}
+
+/* ── SESSION HISTORY MODAL ── */
+function SessionHistoryModal({ history, onClose }) {
+  const fmtDur = (s) => {
+    const h = Math.floor(s / 3600);
+    const m = Math.floor((s % 3600) / 60);
+    return h > 0 ? `${h}h${String(m).padStart(2,"0")}` : `${m}min`;
+  };
+  const sorted = [...history].reverse();
+  return (
+    React.createElement("div", {"className": "modal-bg", "onClick": (e) => { if (e.target === e.currentTarget) onClose(); }}, React.createElement("div", {"className": "modal modal-wide"}, React.createElement("div", {"className": "modal-head"}, React.createElement("h3", null, "SESSION HISTORY"), React.createElement("button", {"className": "modal-close", "onClick": onClose}, React.createElement(X, {"size": 14}))), React.createElement("div", {"className": "modal-body", "style": { maxHeight: "70vh", overflowY: "auto" }}, sorted.length === 0 && React.createElement("p", {"className": "opt-hint"}, "Aucune session terminée."), sorted.map((s, i) => (
+            React.createElement("div", {"key": i, "className": "sh-row"}, React.createElement("div", {"className": "sh-id"}, "#", s.id), React.createElement("div", {"className": "sh-details"}, React.createElement("span", {"className": "sh-room"}, s.room || "—"), React.createElement("span", {"className": "sh-blind"}, s.blind || "—")), React.createElement("div", {"className": "sh-meta"}, React.createElement("span", null, s.handCount, "hands"), React.createElement("span", null, fmtDur(s.duration)), React.createElement("span", {"className": "sh-date"}, new Date(s.date).toLocaleDateString())))
+          )))))
+  );
+}
+
+/* ── PLAYER OBSERVER MODAL ── */
+function ExportModal({ playerDB, onExportAll, onExportPlayers, onClose }) {
+  const [mode, setMode] = useState("menu"); // menu | players
+  const [selected, setSelected] = useState({});
+
+  const players = playerDB.filter(p => p.id !== "hero");
+  const selectedIds = Object.entries(selected).filter(([, v]) => v).map(([k]) => k);
+  const allSelected = players.length > 0 && players.every(p => selected[p.id]);
+
+  const toggleAll = () => {
+    if (allSelected) setSelected({});
+    else {
+      const next = {};
+      players.forEach(p => { next[p.id] = true; });
+      setSelected(next);
+    }
+  };
+
+  return (
+    React.createElement("div", {"className": "modal-bg", "onClick": (e) => { if (e.target === e.currentTarget) onClose(); }}, React.createElement("div", {"className": "modal modal-wide"}, React.createElement("div", {"className": "modal-head"}, React.createElement("h3", null, mode === "menu" ? "EXPORT DATA" : "SELECT PLAYERS"), React.createElement("button", {"className": "modal-close", "onClick": onClose}, React.createElement(X, {"size": 14}))), mode === "menu" ? (
+          React.createElement("div", {"className": "modal-body"}, React.createElement("p", {"className": "opt-hint", "style": { marginBottom: 12, fontSize: 11 }}, "Que veux-tu exporter ?"), React.createElement("div", {"style": { display: "flex", flexDirection: "column", gap: 8 }}, React.createElement("button", {"className": "name-btn rename", "onClick": onExportAll}, "💾 EXPORT ALL (full backup)"), React.createElement("button", {"className": "name-btn rename", "onClick": () => setMode("players")}, "👥 EXPORT PLAYERS (sélection)"), React.createElement("button", {"className": "name-btn rename-reset", "onClick": onClose}, "ANNULER")))
+        ) : (
+          React.createElement(React.Fragment, null, React.createElement("div", {"className": "modal-body", "style": { maxHeight: "60vh", overflowY: "auto" }}, React.createElement("button", {"className": "tog", "style": { marginBottom: 10 }, "onClick": toggleAll}, allSelected ? "☑ Tout désélectionner" : "☐ Tout sélectionner"), players.length === 0 && React.createElement("p", {"className": "opt-hint"}, "Aucun joueur en base."), players.map((p) => (
+                React.createElement("button", {"key": p.id, "className": "po-player-btn", "style": selected[p.id] ? { borderColor: "var(--cy-cyan)", background: "rgba(0,245,255,0.1)" } : undefined, "onClick": () => setSelected(s => ({ ...s, [p.id]: !s[p.id] }))}, React.createElement("span", {"className": "po-name"}, selected[p.id] ? "☑" : "☐", p.name), React.createElement("span", {"className": "po-room"}, p.room || "—"), React.createElement("span", {"className": "po-hands"}, (p.globalStats || emptyStats()).hands, "h"))
+              ))), React.createElement("div", {"className": "modal-foot"}, React.createElement("button", {"className": "next-hand", "style": { animation: "none", width: "100%", opacity: selectedIds.length > 0 ? 1 : 0.4 }, "disabled": selectedIds.length === 0, "onClick": () => onExportPlayers(selectedIds)}, "EXPORT", selectedIds.length, "JOUEUR(S)")))
+        )))
+  );
+}
+
+function PlayerObserverModal({ playerDB, setPlayerDB, rooms, selected, onSelect, onClose }) {
+  const [viewMode, setViewMode] = useState("global");
+  const [editingId, setEditingId] = useState(null);
+  const [editName, setEditName] = useState("");
+  const [editRoom, setEditRoom] = useState("");
+  const [newName, setNewName] = useState("");
+  const [newRoom, setNewRoom] = useState("");
+  const [confirmDeleteId, setConfirmDeleteId] = useState(null);
+  const [search, setSearch] = useState("");
+  const [addMsg, setAddMsg] = useState(null);
+  const [mergePickerOpen, setMergePickerOpen] = useState(false);
+  const [mergeConfirm, setMergeConfirm] = useState(null); // { source, target }
+  const [drillCell, setDrillCell] = useState(null);
+  const [showSDPos, setShowSDPos] = useState(null);
+  const drillRef = useRef(null);
+
+  useEffect(() => {
+    if (drillCell && drillRef.current) {
+      setTimeout(() => {
+        drillRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
+      }, 50);
+    }
+  }, [drillCell]);
+
+  const doMerge = (sourcePlayer, targetPlayer, keepName) => {
+    setPlayerDB((prev) => {
+      const mergedGlobal = mergeStats(targetPlayer.globalStats || emptyStats(), sourcePlayer.globalStats || emptyStats());
+      const mergedSession = mergeStats(targetPlayer.sessionStats || emptyStats(), sourcePlayer.sessionStats || emptyStats());
+      return prev
+        .filter(p => p.id !== sourcePlayer.id && p.id !== targetPlayer.id)
+        .concat([{
+          ...targetPlayer,
+          name: keepName,
+          globalStats: mergedGlobal,
+          sessionStats: mergedSession,
+        }]);
+    });
+    setMergeConfirm(null);
+    setMergePickerOpen(false);
+    // Return to the list after merge
+    onSelect("_list");
+  };
+
+  const exportSelected = (playerIds) => {
+    const players = playerDB.filter(p => playerIds.includes(p.id));
+    const data = { version: 1, type: "players", players };
+    const blob = new Blob([JSON.stringify(data, null, 2)], { type: "application/json" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `trck-it-players-${new Date().toISOString().slice(0,10)}.json`;
+    a.click();
+    URL.revokeObjectURL(url);
+  };
+
+  const addPlayers = () => {
+    const raw = newName.trim();
+    if (!raw) return;
+    const names = raw.split(",").map((n) => normalizeName(n)).filter(Boolean);
+    let added = 0;
+    const dupes = [];
+    setPlayerDB((prev) => {
+      let next = [...prev];
+      names.forEach((name) => {
+        if (isRandomName(name)) return;
+        if (next.some((p) => normalizeName(p.name) === name)) {
+          dupes.push(name);
+          return;
+        }
+        const id = `p_${Date.now()}_${Math.random().toString(36).slice(2, 7)}_${added}`;
+        next = [...next, { id, name, room: newRoom || "", sessionStats: emptyStats(), globalStats: emptyStats() }];
+        added++;
+      });
+      return next;
+    });
+    if (dupes.length > 0) {
+      setAddMsg(`Doublon: ${dupes.join(", ")}`);
+      setTimeout(() => setAddMsg(null), 3000);
+    }
+    if (added > 0) { setNewName(""); }
+  };
+
+  if (selected === "_list") {
+    const players = playerDB.filter((p) => p.id !== "hero");
+    const q = normalizeName(search);
+    const filtered = q ? players.filter((p) => normalizeName(p.name).includes(q)) : players;
+    return (
+      React.createElement("div", {"className": "modal-bg", "onClick": (e) => { if (e.target === e.currentTarget) onClose(); }}, React.createElement("div", {"className": "modal modal-wide", "style": { display: "flex", flexDirection: "column", maxHeight: "85vh" }}, React.createElement("div", {"className": "modal-head"}, React.createElement("h3", null, "PLAYER OBSERVER"), React.createElement("button", {"className": "modal-close", "onClick": onClose}, React.createElement(X, {"size": 14}))), React.createElement("div", {"className": "po-search-bar"}, React.createElement("input", {"className": "ss-input", "placeholder": "🔍 Rechercher...", "value": search, "onChange": (e) => setSearch(e.target.value)})), React.createElement("div", {"className": "modal-body", "style": { flex: 1, overflowY: "auto", overscrollBehavior: "contain", paddingBottom: 8 }}, filtered.length === 0 && React.createElement("p", {"className": "opt-hint"}, q ? "Aucun résultat." : "Aucun joueur en base."), filtered.map((p) => (
+              React.createElement("div", {"key": p.id, "className": "po-player-row"}, confirmDeleteId === p.id ? (
+                  React.createElement("div", {"className": "po-confirm-row"}, React.createElement("span", {"className": "po-confirm-text"}, "Supprimer", p.name, "?"), React.createElement("button", {"className": "act act-danger", "onClick": () => {
+                      setPlayerDB((prev) => prev.filter(pp => pp.id !== p.id));
+                      setConfirmDeleteId(null);
+                    }}, "SUPPRIMER"), React.createElement("button", {"className": "act act-neutral", "onClick": () => setConfirmDeleteId(null)}, "ANNULER"))
+                ) : editingId === p.id ? (
+                  React.createElement("div", {"className": "po-edit-row"}, React.createElement("input", {"className": "ss-input ss-input-sm", "value": editName, "onChange": (e) => setEditName(e.target.value)}), React.createElement("select", {"className": "ss-select", "value": editRoom, "onChange": (e) => setEditRoom(e.target.value)}, React.createElement("option", {"value": ""}, "—"), rooms.map(r => React.createElement("option", {"key": r, "value": r}, r))), React.createElement("button", {"className": "ss-add-btn", "onClick": () => {
+                      const nn = normalizeName(editName);
+                      setPlayerDB((prev) => prev.map((pp) =>
+                        pp.id === p.id ? { ...pp, name: nn || pp.name, room: editRoom } : pp
+                      ));
+                      setEditingId(null);
+                    }}, "✓"), React.createElement("button", {"className": "ss-add-btn", "onClick": () => setEditingId(null)}, "✕"))
+                ) : (
+                  React.createElement(React.Fragment, null, React.createElement("button", {"className": "po-player-btn", "onClick": () => onSelect(p)}, React.createElement("span", {"className": "po-name"}, p.name), React.createElement("span", {"className": "po-room"}, p.room || "—"), React.createElement("span", {"className": "po-hands"}, (p.globalStats || emptyStats()).hands, "h"), React.createElement(ChevronRight, {"size": 12})), React.createElement("div", {"className": "po-actions"}, React.createElement("button", {"className": "ss-edit-btn", "onClick": () => {
+                        setEditingId(p.id);
+                        setEditName(p.name);
+                        setEditRoom(p.room || "");
+                      }}, "✎"), React.createElement("button", {"className": "ss-del-btn", "onClick": () => setConfirmDeleteId(p.id)}, React.createElement(Trash2, {"size": 10}))))
+                ))
+            ))), React.createElement("div", {"className": "po-add-fixed"}, addMsg && React.createElement("p", {"className": "po-add-msg"}, addMsg), React.createElement("div", {"className": "po-add-row"}, React.createElement("input", {"className": "ss-input", "placeholder": "Nom ou noms séparés par ,", "value": newName, "onChange": (e) => setNewName(e.target.value), "onKeyDown": (e) => e.key === "Enter" && addPlayers()}), React.createElement("select", {"className": "ss-select", "value": newRoom, "onChange": (e) => setNewRoom(e.target.value)}, React.createElement("option", {"value": ""}, "Room —"), rooms.map(r => React.createElement("option", {"key": r, "value": r}, r))), React.createElement("button", {"className": "ss-add-btn", "onClick": addPlayers}, React.createElement(Plus, {"size": 12}))))))
+    );
+  }
+
+  // Detailed view for a specific player
+  const p = selected;
+  const stats = viewMode === "global" ? (p.globalStats || emptyStats()) : (p.sessionStats || emptyStats());
+
+  const exportPlayer = () => {
+    const data = { version: 1, type: "player", player: p };
+    const blob = new Blob([JSON.stringify(data, null, 2)], { type: "application/json" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `trck-it-${p.name.toLowerCase().replace(/\s+/g, "-")}.json`;
+    a.click();
+    URL.revokeObjectURL(url);
+  };
+
+  return (
+    React.createElement("div", {"className": "modal-bg", "onClick": (e) => { if (e.target === e.currentTarget) onClose(); }}, React.createElement("div", {"className": "modal modal-wide"}, React.createElement("div", {"className": "modal-head"}, React.createElement("button", {"className": "modal-back", "onClick": () => onSelect("_list")}, "← BACK"), React.createElement("h3", null, p.name), React.createElement("button", {"className": "modal-close", "onClick": onClose}, React.createElement(X, {"size": 14}))), React.createElement("div", {"className": "modal-body", "style": { maxHeight: "70vh", overflowY: "auto" }}, React.createElement("div", {"className": "po-toggle"}, React.createElement("button", {"className": `tog ${viewMode === "session" ? "on" : ""}`, "onClick": () => { setViewMode("session"); setDrillCell(null); }}, "SESSION"), React.createElement("button", {"className": `tog ${viewMode === "global" ? "on" : ""}`, "onClick": () => { setViewMode("global"); setDrillCell(null); }}, "GLOBAL"), React.createElement("button", {"className": "tog", "onClick": exportPlayer, "title": "Export JSON"}, "💾 EXPORT"), React.createElement("button", {"className": "tog", "onClick": () => setMergePickerOpen(true), "title": "Merge with another player"}, "🔗 MERGE")), React.createElement("div", {"className": "po-meta"}, React.createElement("span", null, "Room:", p.room || "—"), React.createElement("span", null, "Hands:", stats.hands)), (() => {
+            const STAT_GROUPS = [
+              ["vpip", "pfr"],
+              ["limp", "rfi"],
+              ["limpFold", "limpCall", "limpRaise"],
+              ["rfiFold", "rfiCall", "rfi4b"],
+              ["iso", "ovl"],
+              ["isoFold", "isoCall", "isoRaise"],
+              ["flat", "threeBet"],
+              ["threeBetFold", "threeBetCall", "threeBet5b"],
+              ["fourBetFold", "fourBetCall", "fourBetRaise"],
+              ["flatMw", "sqz"],
+              ["sqzFold", "sqzCall", "sqz5b"],
+              ["coldCall", "cold4b"],
+              ["postCheck", "postRaise"],
+              ["postXFold", "postXCall", "postXRaise"],
+            ];
+            return (
+              React.createElement("div", {"className": "po-stats-rows"}, STAT_GROUPS.map((row, ri) => (
+                  React.createElement("div", {"key": ri, "className": `po-stats-row po-stats-row-${row.length}`}, row.map((k) => {
+                      const s = stats[k] || { opp: 0, act: 0 };
+                      const v = pct(s.opp, s.act);
+                      const isActive = drillCell === k;
+                      return (
+                        React.createElement("div", {"key": k, "className": `po-stat po-stat-clickable ${isActive ? "po-stat-active" : ""}`, "onClick": () => { setDrillCell(isActive ? null : k); setShowSDPos(null); }}, React.createElement("span", {"className": "po-stat-label"}, STAT_LABELS[k] || k), React.createElement("span", {"className": "po-stat-val", "style": { color: statColor(v, k) }}, fmt(v)), React.createElement("span", {"className": "po-stat-frac"}, s.act, "/", s.opp))
+                      );
+                    }))
+                )))
+            );
+          })(), drillCell && (() => {
+            const byPos = stats.byPos || {};
+            return (
+              React.createElement("div", {"className": "drill-row", "ref": drillRef, "style": { marginTop: 12 }}, React.createElement("div", {"className": "drill-row-head"}, React.createElement("span", null, STAT_LABELS[drillCell] || drillCell, "BY POSITION"), React.createElement("button", {"className": "drill-close", "onClick": () => setDrillCell(null)}, React.createElement(X, {"size": 10}))), React.createElement("div", {"className": "drill-row-cols"}, POSITION_ORDER.map((pos) => {
+                    const posData = byPos[pos];
+                    const ps = posData?.[drillCell] || { opp: 0, act: 0 };
+                    const hasData = posData && posData.hands > 0;
+                    const val = !hasData || ps.opp === 0 ? null : pct(ps.opp, ps.act);
+                    const sds = ps.showdowns || [];
+                    const hasSD = sds.length > 0;
+                    return (
+                      React.createElement("div", {"key": pos, "className": `drill-col ${hasSD ? "drill-col-sd" : ""}`, "onClick": hasSD ? () => setShowSDPos(showSDPos === pos ? null : pos) : undefined}, React.createElement("span", {"className": "drill-col-pos"}, pos), React.createElement("span", {"className": "drill-col-val", "style": { color: val === null ? "var(--dim)" : statColor(val, drillCell) }}, val === null ? "NA" : `${val}`), React.createElement("span", {"className": "drill-col-frac"}, hasData ? `${ps.act}/${ps.opp}` : "—"), hasSD && React.createElement("span", {"className": "drill-sd-badge"}, "🃏", sds.length), showSDPos === pos && (
+                          React.createElement("div", {"className": "drill-sd-list"}, sds.map((h, i) => React.createElement("span", {"key": i, "className": "drill-sd-hand"}, h)))
+                        ))
+                    );
+                  })))
+            );
+          })())), mergePickerOpen && (
+        React.createElement("div", {"className": "modal-bg", "style": { zIndex: 100 }, "onClick": (e) => { if (e.target === e.currentTarget) setMergePickerOpen(false); }}, React.createElement("div", {"className": "modal modal-wide"}, React.createElement("div", {"className": "modal-head"}, React.createElement("h3", null, "MERGE WITH..."), React.createElement("button", {"className": "modal-close", "onClick": () => setMergePickerOpen(false)}, React.createElement(X, {"size": 14}))), React.createElement("div", {"className": "modal-body", "style": { maxHeight: "70vh", overflowY: "auto" }}, React.createElement("p", {"className": "opt-hint", "style": { marginBottom: 10 }}, "Choisis le joueur à fusionner avec", React.createElement("strong", null, p.name), ":"), playerDB.filter(pp => pp.id !== "hero" && pp.id !== p.id).map((pp) => (
+                React.createElement("button", {"key": pp.id, "className": "po-player-btn", "onClick": () => setMergeConfirm({ source: p, target: pp })}, React.createElement("span", {"className": "po-name"}, pp.name), React.createElement("span", {"className": "po-room"}, pp.room || "—"), React.createElement("span", {"className": "po-hands"}, (pp.globalStats || emptyStats()).hands, "h"), React.createElement(ChevronRight, {"size": 12}))
+              )), playerDB.filter(pp => pp.id !== "hero" && pp.id !== p.id).length === 0 && (
+                React.createElement("p", {"className": "opt-hint"}, "Aucun autre joueur en base.")
+              ))))
+      ), mergeConfirm && (
+        React.createElement("div", {"className": "modal-bg", "style": { zIndex: 101 }, "onClick": (e) => { if (e.target === e.currentTarget) setMergeConfirm(null); }}, React.createElement("div", {"className": "modal"}, React.createElement("div", {"className": "modal-head"}, React.createElement("h3", null, "CONFIRMER FUSION"), React.createElement("button", {"className": "modal-close", "onClick": () => setMergeConfirm(null)}, React.createElement(X, {"size": 14}))), React.createElement("div", {"className": "modal-body"}, React.createElement("p", {"className": "opt-hint", "style": { marginBottom: 12, fontSize: 12 }}, "Fusion de", React.createElement("strong", null, mergeConfirm.source.name), "(", (mergeConfirm.source.globalStats?.hands || 0), "h) et", React.createElement("strong", null, mergeConfirm.target.name), "(", (mergeConfirm.target.globalStats?.hands || 0), "h)."), React.createElement("p", {"className": "opt-hint", "style": { marginBottom: 10, fontSize: 11 }}, "Garder quel nom ?"), React.createElement("div", {"style": { display: "flex", flexDirection: "column", gap: 8 }}, React.createElement("button", {"className": "name-btn rename", "onClick": () => doMerge(mergeConfirm.source, mergeConfirm.target, mergeConfirm.source.name)}, mergeConfirm.source.name), React.createElement("button", {"className": "name-btn rename", "onClick": () => doMerge(mergeConfirm.source, mergeConfirm.target, mergeConfirm.target.name)}, mergeConfirm.target.name), React.createElement("button", {"className": "name-btn rename-reset", "onClick": () => setMergeConfirm(null)}, "ANNULER")))))
+      ))
+  );
+}
+
+/* =============================================================================
+   8. STYLES
+   ========================================================================== */
+
+const CSS = `
+@import url('https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap');
+
+:root {
+  --bg: #05060a;
+  --bg-2: #080b13;
+  --panel: rgba(12, 16, 26, 0.7);
+  --line: rgba(0, 245, 255, 0.18);
+  --line-hot: rgba(255, 42, 109, 0.35);
+  --ink: #eaf6f8;
+  --ink-soft: #b8d4d8;
+  --dim: #6e8a95;
+  --faint: #354650;
+  --cy-cyan: #00f5ff;
+  --cy-pink: #ff2a6d;
+  --cy-yellow: #fff45a;
+  --cy-green: #8fffb0;
+  --cy-purple: #b27cff;
+}
+
+* { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+html, body { margin: 0; padding: 0; background: var(--bg); }
+
+.app {
+  position: relative;
+  min-height: 100vh;
+  background:
+    radial-gradient(500px 400px at 15% -5%, rgba(0,245,255,0.08), transparent 60%),
+    radial-gradient(500px 400px at 105% 10%, rgba(255,42,109,0.08), transparent 60%),
+    linear-gradient(180deg, var(--bg) 0%, var(--bg-2) 100%);
+  color: var(--ink);
+  font-family: 'Chakra Petch', system-ui, sans-serif;
+  padding: 8px 10px 24px;
+  max-width: 540px;
+  margin: 0 auto;
+  -webkit-user-select: none;
+  user-select: none;
+  -webkit-tap-highlight-color: transparent;
+}
+/* Allow select in inputs */
+.app input, .app select, .app textarea {
+  -webkit-user-select: text;
+  user-select: text;
+}
+
+.scanlines {
+  position: fixed; inset: 0; pointer-events: none; z-index: 100;
+  background: repeating-linear-gradient(0deg,
+    rgba(0,245,255,0.012) 0px, rgba(0,245,255,0.012) 1px,
+    transparent 1px, transparent 3px);
+  mix-blend-mode: overlay;
+}
+
+/* ── HEADER ───────────────────────────────────────────────────────── */
+.top {
+  display: flex; flex-direction: column;
+  gap: 6px; padding: 8px 4px;
+  border-bottom: 1px solid var(--line);
+  margin-bottom: 10px; position: relative;
+}
+.top::after {
+  content: ''; position: absolute;
+  left: 0; right: 0; bottom: -1px; height: 1px;
+  background: linear-gradient(90deg, transparent, var(--cy-cyan), transparent);
+  opacity: 0.6;
+}
+.top-bar {
+  display: flex; align-items: center; justify-content: space-between;
+  width: 100%;
+}
+.brand { display: flex; gap: 8px; align-items: center; }
+.logo-mark {
+  color: var(--cy-cyan); font-size: 20px; line-height: 1;
+  filter: drop-shadow(0 0 8px var(--cy-cyan));
+  animation: flicker 3s infinite;
+}
+@keyframes flicker {
+  0%,95%,100% { opacity: 1; }
+  96%,98% { opacity: 0.3; }
+}
+.brand h1 {
+  font-family: 'Chakra Petch', sans-serif;
+  font-weight: 700; font-size: 18px;
+  letter-spacing: 0.12em; margin: 0; line-height: 1;
+  color: var(--ink);
+  text-shadow: 0 0 10px rgba(0,245,255,0.3);
+}
+.brand .accent { color: var(--cy-pink); }
+.burger-btn {
+  background: transparent;
+  border: 1px solid var(--line);
+  color: var(--cy-cyan);
+  padding: 6px 10px;
+  cursor: pointer;
+  font-size: 16px;
+  line-height: 1;
+  clip-path: polygon(4px 0, 100% 0, 100% calc(100% - 4px), calc(100% - 4px) 100%, 0 100%, 0 4px);
+}
+.burger-btn:active { background: rgba(0,245,255,0.1); }
+.controls {
+  display: flex; gap: 4px; align-items: center;
+  flex-wrap: wrap;
+  justify-content: flex-start;
+  max-width: 100%;
+}
+.btn-label { padding: 6px 8px; }
+.ctrl {
+  display: inline-flex; align-items: center; gap: 4px;
+  padding: 5px 8px;
+  background: rgba(0,245,255,0.05);
+  border: 1px solid var(--line);
+  color: var(--cy-cyan);
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px;
+  clip-path: polygon(6px 0, 100% 0, 100% calc(100% - 6px), calc(100% - 6px) 100%, 0 100%, 0 6px);
+}
+.ctrl.disabled { opacity: 0.3; pointer-events: none; }
+.ctrl select {
+  background: transparent; color: var(--cy-cyan);
+  border: none; outline: none;
+  font-family: 'JetBrains Mono', monospace;
+  font-weight: 700; font-size: 12px; cursor: pointer;
+}
+.ctrl select option { background: var(--bg-2); }
+.btn {
+  display: inline-flex; align-items: center; gap: 4px;
+  padding: 6px 8px;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px; font-weight: 700;
+  letter-spacing: 0.1em; text-transform: uppercase;
+  cursor: pointer;
+  border: 1px solid var(--line);
+  background: rgba(0,245,255,0.05);
+  color: var(--cy-cyan);
+  clip-path: polygon(4px 0, 100% 0, 100% calc(100% - 4px), calc(100% - 4px) 100%, 0 100%, 0 4px);
+}
+.btn:active { background: rgba(0,245,255,0.15); }
+.btn:disabled { opacity: 0.25; }
+.btn.on {
+  background: var(--cy-yellow);
+  color: var(--bg);
+  border-color: var(--cy-yellow);
+}
+
+/* ── BURGER MENU ─────────────────────────────────────────────────── */
+.burger-wrap {
+  position: relative;
+  display: inline-block;
+}
+.burger-icon {
+  font-size: 14px; line-height: 1;
+}
+.burger-bg {
+  position: fixed; inset: 0; z-index: 50;
+  background: rgba(0,0,0,0.3);
+}
+.burger-menu {
+  position: absolute;
+  top: calc(100% + 6px);
+  right: 0;
+  z-index: 60;
+  background: var(--bg-2);
+  border: 1px solid var(--cy-cyan);
+  box-shadow: 0 4px 24px rgba(0,245,255,0.3);
+  min-width: 180px;
+  display: flex; flex-direction: column;
+  clip-path: polygon(6px 0, 100% 0, 100% calc(100% - 6px), calc(100% - 6px) 100%, 0 100%, 0 6px);
+}
+.burger-item {
+  padding: 12px 16px;
+  background: transparent;
+  border: none;
+  border-bottom: 1px solid var(--line);
+  color: var(--ink);
+  font-family: 'Chakra Petch', sans-serif;
+  font-size: 13px;
+  font-weight: 600;
+  text-align: left;
+  cursor: pointer;
+}
+.burger-item:last-child { border-bottom: none; }
+.burger-item:active { background: rgba(0,245,255,0.08); color: var(--cy-cyan); }
+.burger-sep {
+  height: 1px;
+  background: var(--line);
+  margin: 0;
+}
+
+/* ── CHIP DELETE (Settings) ──────────────────────────────────────── */
+.ss-chip-wrap {
+  display: inline-flex; align-items: center; gap: 0;
+  position: relative;
+}
+.ss-chip-del {
+  position: absolute;
+  top: -4px; right: -4px;
+  width: 14px; height: 14px;
+  background: var(--cy-pink);
+  color: var(--bg);
+  border: none; border-radius: 50%;
+  font-size: 8px;
+  display: flex; align-items: center; justify-content: center;
+  cursor: pointer;
+  padding: 0;
+}
+.ss-chip-del:active { opacity: 0.7; }
+
+/* ── PLAYER OBSERVER EDIT ────────────────────────────────────────── */
+.po-player-row {
+  display: flex; align-items: center; gap: 4px;
+  border-bottom: 1px solid var(--line);
+}
+.po-player-row .po-player-btn {
+  flex: 1; border-bottom: none;
+}
+.po-actions {
+  display: flex; gap: 2px; flex-shrink: 0;
+}
+.po-edit-row {
+  display: flex; align-items: center; gap: 4px;
+  width: 100%; padding: 8px 0;
+}
+.po-confirm-row {
+  display: flex; align-items: center; gap: 6px;
+  width: 100%; padding: 8px 0;
+}
+.po-confirm-text {
+  font-family: 'Chakra Petch', sans-serif;
+  font-size: 12px; font-weight: 600;
+  color: var(--ink);
+  flex: 1;
+}
+.po-merge-target {
+  color: var(--cy-pink);
+  font-size: 16px;
+  font-weight: 900;
+  margin-left: auto;
+}
+.po-stat-clickable {
+  cursor: pointer;
+  transition: background 120ms;
+}
+.po-stat-clickable:active { background: rgba(0,245,255,0.1); }
+.po-stat-active {
+  background: rgba(255,42,109,0.12) !important;
+  border: 1px solid var(--cy-pink);
+}
+
+.import-conflict {
+  padding: 10px;
+  margin-bottom: 10px;
+  border: 1px solid var(--line);
+  background: rgba(0,245,255,0.04);
+}
+.import-conflict-head {
+  display: flex; justify-content: space-between; align-items: center;
+  margin-bottom: 8px;
+}
+.import-conflict-name {
+  font-family: 'Chakra Petch', sans-serif;
+  font-weight: 700; font-size: 13px;
+  color: var(--ink);
+}
+.import-conflict-meta {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 9px; color: var(--dim);
+}
+.import-conflict-choices {
+  display: flex; gap: 4px;
+}
+
+.po-add-fixed {
+  border-top: 1px solid var(--cy-cyan);
+  padding: 10px 12px;
+  background: var(--bg-2);
+  flex-shrink: 0;
+}
+.po-add-row {
+  display: flex; gap: 4px;
+}
+.po-add-msg {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 9px;
+  color: var(--cy-yellow);
+  padding-top: 4px;
+}
+.po-search-bar {
+  padding: 6px 12px;
+  border-bottom: 1px solid var(--line);
+  flex-shrink: 0;
+}
+
+/* ── STATUS BAR ───────────────────────────────────────────────────── */
+/* ── START SESSION ────────────────────────────────────────────────── */
+.start-session-wrap {
+  display: flex; flex-direction: column;
+  align-items: center;
+  padding: 40px 10px;
+  gap: 12px;
+}
+.start-session-btn {
+  width: 100%;
+  padding: 16px;
+  font-family: 'Chakra Petch', sans-serif;
+  font-weight: 700; font-size: 16px;
+  letter-spacing: 0.25em;
+  text-transform: uppercase;
+  color: var(--bg);
+  background: var(--cy-cyan);
+  border: none; cursor: pointer;
+  clip-path: polygon(8px 0, 100% 0, 100% calc(100% - 8px), calc(100% - 8px) 100%, 0 100%, 0 8px);
+  box-shadow: 0 0 30px rgba(0,245,255,0.4);
+  animation: hum 1.5s ease-in-out infinite;
+}
+.start-session-btn:active { transform: scale(0.97); }
+.start-hint {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px; color: var(--dim);
+  letter-spacing: 0.1em;
+  text-align: center;
+}
+
+/* ── STATUS BAR ──────────────────────────────────────────────────── */
+.status-bar {
+  display: flex; flex-direction: column; gap: 6px;
+  margin-bottom: 10px;
+}
+.sb-info {
+  display: flex; gap: 4px; align-items: stretch; flex-wrap: wrap;
+}
+.status-item {
+  flex: 1;
+  min-width: 48px;
+  display: flex; flex-direction: column;
+  align-items: center; justify-content: center;
+  padding: 5px 3px;
+  background: rgba(0,245,255,0.04);
+  border: 1px solid var(--line);
+  clip-path: polygon(4px 0, 100% 0, 100% calc(100% - 4px), calc(100% - 4px) 100%, 0 100%, 0 4px);
+}
+.st-l {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 7px; letter-spacing: 0.2em;
+  color: var(--cy-cyan); opacity: 0.7;
+  text-transform: uppercase;
+  line-height: 1;
+}
+.st-v {
+  font-family: 'Chakra Petch', sans-serif;
+  font-weight: 700; font-size: 12px;
+  line-height: 1.2; color: var(--ink);
+  text-shadow: 0 0 6px var(--cy-cyan);
+  white-space: nowrap;
+  overflow: hidden; text-overflow: ellipsis;
+  max-width: 72px; text-align: center;
+}
+.status-end {
+  padding: 5px 10px;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 9px; font-weight: 700;
+  letter-spacing: 0.15em;
+  cursor: pointer;
+  border: 1px solid var(--cy-pink);
+  background: rgba(255,42,109,0.1);
+  color: var(--cy-pink);
+  clip-path: polygon(4px 0, 100% 0, 100% calc(100% - 4px), calc(100% - 4px) 100%, 0 100%, 0 4px);
+}
+.status-end:active { background: rgba(255,42,109,0.25); }
+.sb-actions {
+  display: flex; gap: 6px; justify-content: flex-end;
+}
+.next-hand {
+  display: inline-flex; align-items: center; justify-content: center;
+  gap: 4px;
+  padding: 8px 14px;
+  font-family: 'Chakra Petch', sans-serif;
+  font-weight: 700; font-size: 13px;
+  letter-spacing: 0.2em;
+  color: var(--bg);
+  background: var(--cy-cyan);
+  border: none; cursor: pointer;
+  clip-path: polygon(6px 0, 100% 0, 100% calc(100% - 6px), calc(100% - 6px) 100%, 0 100%, 0 6px);
+  box-shadow: 0 0 20px var(--cy-cyan);
+  animation: hum 1.5s ease-in-out infinite;
+}
+.next-hand.secondary {
+  background: var(--cy-purple);
+  box-shadow: 0 0 16px var(--cy-purple);
+  font-size: 12px;
+  padding: 8px 12px;
+}
+.next-hand.showdown-btn {
+  background: var(--cy-yellow);
+  color: var(--bg);
+  box-shadow: 0 0 16px rgba(255,216,74,0.5);
+  font-size: 11px;
+  padding: 8px 14px;
+  letter-spacing: 0.15em;
+  animation: none;
+}
+@keyframes hum {
+  0%,100% { box-shadow: 0 0 20px var(--cy-cyan); }
+  50% { box-shadow: 0 0 30px var(--cy-cyan), 0 0 50px rgba(0,245,255,0.4); }
+}
+.next-hand:active { transform: scale(0.96); }
+
+/* ── BTN PLACER ───────────────────────────────────────────────────── */
+.btn-placer {
+  display: flex; align-items: center; gap: 5px;
+  margin-bottom: 10px;
+  overflow-x: auto; padding: 4px 2px;
+}
+.btn-placer::-webkit-scrollbar { display: none; }
+.bp-lbl {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 9px; letter-spacing: 0.2em;
+  color: var(--cy-cyan); text-transform: uppercase;
+  flex-shrink: 0; opacity: 0.8;
+}
+.bp-dot {
+  flex-shrink: 0;
+  width: 28px; height: 28px;
+  border: 1px solid var(--line);
+  background: rgba(0,245,255,0.04);
+  color: var(--ink-soft);
+  font-family: 'JetBrains Mono', monospace;
+  font-weight: 700; font-size: 11px;
+  cursor: pointer;
+  clip-path: polygon(4px 0, 100% 0, 100% calc(100% - 4px), calc(100% - 4px) 100%, 0 100%, 0 4px);
+}
+.bp-dot.on {
+  background: var(--cy-yellow); color: var(--bg);
+  border-color: var(--cy-yellow);
+  box-shadow: 0 0 10px var(--cy-yellow);
+}
+.bp-dot.muted {
+  opacity: 0.3;
+}
+
+/* ── HAND CONTROLS (undo + reset hand, above player list) ──────────── */
+.hand-controls {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 6px;
+  margin-bottom: 6px;
+  padding: 0 2px;
+}
+.hc-toggles {
+  display: flex;
+  gap: 4px;
+}
+.hc-tog {
+  padding: 5px 10px;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.15em;
+  cursor: pointer;
+  border: 1px solid var(--line);
+  background: rgba(0,245,255,0.04);
+  color: var(--dim);
+  clip-path: polygon(4px 0, 100% 0, 100% calc(100% - 4px), calc(100% - 4px) 100%, 0 100%, 0 4px);
+}
+.hc-tog.on {
+  background: var(--cy-yellow);
+  color: var(--bg);
+  border-color: var(--cy-yellow);
+  text-shadow: none;
+}
+.hc-tog:disabled { opacity: 0.3; cursor: not-allowed; }
+.hc-tog:active:not(:disabled) { background: rgba(0,245,255,0.12); }
+.hc-actions {
+  display: flex;
+  gap: 4px;
+}
+.hc-btn {
+  display: inline-flex; align-items: center; gap: 5px;
+  padding: 5px 10px;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 9.5px;
+  font-weight: 700;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  cursor: pointer;
+  border: 1px solid var(--line);
+  background: rgba(0,245,255,0.04);
+  color: var(--cy-cyan);
+  clip-path: polygon(4px 0, 100% 0, 100% calc(100% - 4px), calc(100% - 4px) 100%, 0 100%, 0 4px);
+}
+.hc-btn:active { background: rgba(0,245,255,0.12); }
+.hc-btn:disabled { opacity: 0.3; cursor: not-allowed; }
+
+/* ── PLAYER LIST ──────────────────────────────────────────────────── */
+.player-list {
+  display: flex; flex-direction: column;
+  gap: 4px;
+  margin-bottom: 16px;
+}
+.row {
+  display: flex; align-items: center; justify-content: space-between;
+  gap: 8px;
+  padding: 8px 10px;
+  background: var(--panel);
+  border: 1px solid var(--line);
+  clip-path: polygon(6px 0, 100% 0, 100% calc(100% - 6px), calc(100% - 6px) 100%, 0 100%, 0 6px);
+  min-height: 36px;
+  transition: border-color 150ms, background 150ms;
+}
+.row.hero {
+  border-color: #ff8a3c !important;
+  background: linear-gradient(90deg, rgba(255,138,60,0.1), var(--panel) 40%);
+  box-shadow: inset 2px 0 0 0 #ff8a3c, 0 0 8px rgba(255,138,60,0.2);
+}
+.row.can-act {
+  border-color: var(--cy-pink);
+  box-shadow: inset 2px 0 0 0 var(--cy-pink);
+}
+.row.can-act.hero {
+  border-color: #ff8a3c !important;
+  box-shadow: inset 2px 0 0 0 #ff8a3c, 0 0 12px rgba(255,138,60,0.4);
+}
+.row.folded { opacity: 0.32; }
+.row.open { opacity: 0.6; border-style: dashed; }
+
+/* SEAT OPEN & BREAK */
+.row.seat-open, .row.seat-break {
+  opacity: 0.5;
+  border-style: dashed;
+  background: rgba(5,6,10,0.5);
+}
+.row.seat-open {
+  border-color: #ff4d4d;
+  opacity: 0.45;
+}
+.row.seat-break {
+  border-color: var(--cy-yellow);
+  opacity: 0.6;
+}
+.inactive-name {
+  color: var(--dim) !important;
+  font-style: italic;
+  text-shadow: none !important;
+}
+.tag-seatopen {
+  color: #ff4d4d !important;
+  border-color: rgba(255,77,77,0.4) !important;
+  background: rgba(255,77,77,0.1) !important;
+  text-shadow: none !important;
+}
+.tag-break {
+  color: var(--cy-yellow) !important;
+  border-color: rgba(255,244,90,0.5) !important;
+  background: rgba(255,244,90,0.1) !important;
+}
+
+/* SWAP MODE (tap to select, tap another to swap) */
+.row.swap-from {
+  border-color: var(--cy-cyan) !important;
+  background: rgba(0,245,255,0.12) !important;
+  box-shadow: 0 0 16px rgba(0,245,255,0.3);
+}
+.row.swap-target {
+  cursor: pointer;
+  border-color: var(--cy-pink) !important;
+  border-style: dashed !important;
+}
+.row.swap-target:active {
+  background: rgba(255,42,109,0.15) !important;
+}
+.swap-label {
+  color: var(--cy-cyan) !important;
+  font-size: 9px !important;
+  font-weight: 700 !important;
+  letter-spacing: 0.1em;
+}
+.swap-label-target {
+  color: var(--cy-pink) !important;
+  font-size: 9px !important;
+  font-weight: 700 !important;
+  letter-spacing: 0.1em;
+  animation: pulse-pink 1s ease-in-out infinite;
+}
+@keyframes pulse-pink {
+  0%,100% { opacity: 1; }
+  50% { opacity: 0.4; }
+}
+.swap-hint {
+  text-align: center;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 9px;
+  color: var(--cy-pink);
+  letter-spacing: 0.1em;
+  padding: 6px;
+  animation: pulse-pink 1s ease-in-out infinite;
+}
+
+.row-menu-btn {
+  width: 20px;
+  height: 32px;
+  background: rgba(0,245,255,0.05);
+  border: 1px solid var(--line);
+  color: var(--cy-cyan);
+  font-weight: 700;
+  font-size: 16px;
+  line-height: 1;
+  padding: 0;
+  cursor: pointer;
+  clip-path: polygon(3px 0, 100% 0, 100% calc(100% - 3px), calc(100% - 3px) 100%, 0 100%, 0 3px);
+  flex-shrink: 0;
+}
+.row-menu-btn:active { background: rgba(0,245,255,0.15); }
+
+.row-left {
+  display: flex; align-items: flex-start; gap: 6px;
+  min-width: 0; flex: 1;
+}
+.row-info {
+  display: flex; flex-direction: column;
+  gap: 1px;
+  min-width: 0; flex: 1;
+  padding-top: 3px;
+}
+.row-tag-inline {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 9px; font-weight: 700;
+  letter-spacing: 0.1em;
+}
+.tag-color-seatopen { color: #ff4d4d; }
+.tag-color-break { color: var(--cy-yellow); }
+.tag-color-post { color: var(--cy-pink); border: 1px solid var(--cy-pink); padding: 0 4px; }
+
+/* Player Observer: stats organized in logical rows */
+.po-stats-rows {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-top: 8px;
+}
+.po-stats-row {
+  display: grid;
+  gap: 4px;
+}
+.po-stats-row-1 { grid-template-columns: 1fr; }
+.po-stats-row-2 { grid-template-columns: 1fr 1fr; }
+.po-stats-row-3 { grid-template-columns: 1fr 1fr 1fr; }
+
+/* Table averages bar (above stats during session) */
+.table-avg-bar {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 4px;
+  margin-bottom: 8px;
+  padding: 8px;
+  background: rgba(0, 245, 255, 0.04);
+  border: 1px solid var(--line);
+  border-radius: 2px;
+}
+.table-avg-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+}
+.table-avg-label {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  color: var(--dim);
+}
+.table-avg-val {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--cy-cyan);
+}
+
+/* Session hand log */
+.hand-log {
+  margin-top: 12px;
+  padding: 8px;
+  background: rgba(0, 245, 255, 0.03);
+  border: 1px solid var(--line);
+  border-radius: 2px;
+}
+.hand-log-head {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.15em;
+  color: var(--cy-cyan);
+  margin-bottom: 6px;
+  padding-bottom: 4px;
+  border-bottom: 1px solid var(--line);
+}
+.hand-log-list {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  max-height: 200px;
+  overflow-y: auto;
+}
+.hand-log-row {
+  display: grid;
+  grid-template-columns: 30px 1fr auto;
+  align-items: center;
+  gap: 8px;
+  padding: 4px 6px;
+  background: rgba(255, 255, 255, 0.02);
+  border-radius: 2px;
+  min-height: 28px;
+}
+.hand-log-num {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px;
+  font-weight: 700;
+  color: var(--cy-yellow);
+}
+.hand-log-desc {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px;
+  color: var(--ink);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.hand-log-trash {
+  background: transparent;
+  border: 1px solid #ff4d4d;
+  color: #ff4d4d;
+  padding: 4px 6px;
+  cursor: pointer;
+  border-radius: 2px;
+  display: flex;
+  align-items: center;
+  transition: background 120ms;
+}
+.hand-log-trash:active { background: rgba(255, 77, 77, 0.2); }
+.hand-log-confirm {
+  background: #ff4d4d;
+  color: white;
+  border: none;
+  padding: 3px 8px;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  cursor: pointer;
+  border-radius: 2px;
+}
+.hand-log-cancel {
+  background: transparent;
+  color: var(--dim);
+  border: 1px solid var(--line);
+  padding: 3px 8px;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  cursor: pointer;
+  border-radius: 2px;
+}
+.row-actions-history {
+  display: flex; flex-wrap: wrap; gap: 4px;
+}
+.action-label {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 9px; font-weight: 700;
+  letter-spacing: 0.08em;
+  padding: 0;
+  line-height: 1.2;
+}
+/* action colors — no border, just colored text */
+.action-fold { color: var(--dim); }
+.action-limp, .action-call, .action-check { color: var(--cy-yellow); }
+.action-open, .action-iso { color: var(--cy-purple); }
+.action-3bet, .action-4bet, .action-5bet, .action-6bet, .action-sqz { color: var(--cy-pink); }
+.action-win { color: #ffd84a; }
+.row-pos {
+  display: flex; align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  min-width: 32px;
+  align-self: stretch;
+  position: relative;
+}
+.pos-name {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 13px;
+  letter-spacing: 0.08em;
+  color: var(--cy-cyan);
+  text-transform: uppercase;
+  font-weight: 800;
+  line-height: 1;
+  padding: 2px 3px;
+  text-align: center;
+  min-width: 28px;
+  display: flex; align-items: center; justify-content: center;
+  height: 100%;
+  border-right: 1px solid currentColor;
+  background: rgba(0,245,255,0.08);
+}
+.seat-id {
+  position: absolute;
+  bottom: -1px; left: calc(100% + 0px);
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 8px;
+  font-weight: 700;
+  color: #fff;
+  opacity: 0.8;
+  line-height: 0.7;
+}
+/* Position-specific colors */
+.pos-bu, .pos-busb {
+  color: #ffd84a;
+  background: rgba(255,216,74,0.12);
+  text-shadow: 0 0 6px rgba(255,216,74,0.4);
+}
+.pos-sb {
+  color: #8fffb0;
+  background: rgba(143,255,176,0.1);
+}
+.pos-bb {
+  color: #ff8a3c;
+  background: rgba(255,138,60,0.15);
+  text-shadow: 0 0 5px rgba(255,138,60,0.4);
+}
+.pos-str {
+  color: #ff5c8a;
+  background: rgba(255,92,138,0.15);
+  text-shadow: 0 0 5px rgba(255,92,138,0.4);
+}
+.pos-msp {
+  color: #ff5c8a;
+  background: rgba(255,92,138,0.15);
+  text-shadow: 0 0 5px rgba(255,92,138,0.4);
+}
+
+.row-name {
+  background: transparent; border: none;
+  font-family: 'Chakra Petch', sans-serif;
+  font-weight: 600; font-size: 15px;
+  color: var(--ink);
+  text-align: left;
+  padding: 0; margin: 0;
+  cursor: pointer;
+  overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+  letter-spacing: 0.02em;
+  min-width: 0;
+}
+.row-name.muted { color: var(--dim); font-style: italic; font-weight: 400; }
+.row-name.edit {
+  outline: none;
+  color: var(--cy-pink);
+  border-bottom: 1px solid var(--cy-pink);
+  min-width: 100px;
+}
+.hero-name {
+  color: #ff8a3c; font-weight: 700;
+  text-shadow: 0 0 8px rgba(255,138,60,0.4);
+}
+.random-name {
+  color: var(--dim);
+  font-style: italic;
+  font-weight: 500;
+  font-size: 13px;
+}
+
+.row-last {
+  margin-left: auto;
+  padding: 2px 6px;
+  font-family: 'JetBrains Mono', monospace;
+  font-weight: 700;
+  font-size: 9.5px;
+  letter-spacing: 0.08em;
+  line-height: 1.3;
+  border: 1px solid currentColor;
+  clip-path: polygon(3px 0, 100% 0, 100% calc(100% - 3px), calc(100% - 3px) 100%, 0 100%, 0 3px);
+  flex-shrink: 0;
+}
+.tag-fold { color: var(--dim); border-color: var(--faint); background: transparent; }
+.tag-limp, .tag-call, .tag-check {
+  color: var(--cy-yellow);
+  background: rgba(255,244,90,0.12);
+}
+.tag-open, .tag-iso {
+  color: var(--cy-purple);
+  background: rgba(178,124,255,0.18);
+}
+.tag-3bet, .tag-4bet, .tag-5bet, .tag-6bet, .tag-sqz {
+  color: var(--cy-pink);
+  background: rgba(255,42,109,0.2);
+  text-shadow: 0 0 4px rgba(255,42,109,0.4);
+}
+.tag-win {
+  color: #ffd84a;
+  background: rgba(255,216,74,0.2);
+  text-shadow: 0 0 6px rgba(255,216,74,0.5);
+  font-weight: 800;
+}
+
+.row-right {
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+/* ── ACTION BUTTONS ───────────────────────────────────────────────── */
+.act-row {
+  display: flex;
+  gap: 4px;
+}
+.act {
+  padding: 7px 10px;
+  min-width: 50px;
+  font-family: 'JetBrains Mono', monospace;
+  font-weight: 700;
+  font-size: 11px;
+  letter-spacing: 0.05em;
+  border: 1px solid var(--line);
+  background: rgba(5,6,10,0.92);
+  color: var(--ink);
+  cursor: pointer;
+  clip-path: polygon(3px 0, 100% 0, 100% calc(100% - 3px), calc(100% - 3px) 100%, 0 100%, 0 3px);
+  transition: transform 80ms, background 120ms;
+  text-align: center;
+  display: inline-flex; align-items: center; justify-content: center; gap: 4px;
+}
+.act:active { transform: scale(0.92); }
+.act.act-mute {
+  color: var(--ink-soft);
+  border-color: var(--faint);
+  background: rgba(53,70,80,0.2);
+}
+.act.act-mute:active { background: rgba(53,70,80,0.5); }
+.act.act-neutral {
+  color: var(--cy-yellow);
+  border-color: rgba(255,244,90,0.5);
+  background: rgba(255,244,90,0.08);
+}
+.act.act-neutral:active { background: rgba(255,244,90,0.25); }
+.act.act-accent {
+  color: #fff;
+  border-color: var(--cy-pink);
+  background: rgba(255,42,109,0.18);
+  box-shadow: 0 0 6px rgba(255,42,109,0.3);
+}
+.act.act-accent:active {
+  background: var(--cy-pink);
+  box-shadow: 0 0 12px var(--cy-pink);
+}
+.act.act-danger {
+  color: #ff4d4d;
+  border-color: #ff4d4d;
+  background: rgba(255,77,77,0.12);
+}
+.act.act-danger:active { background: rgba(255,77,77,0.3); }
+.act.act-warn {
+  color: var(--cy-yellow);
+  border-color: var(--cy-yellow);
+  background: rgba(255,244,90,0.1);
+}
+.act.act-warn:active { background: rgba(255,244,90,0.25); }
+
+.row-status {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 9px;
+  letter-spacing: 0.15em;
+  color: var(--dim);
+  text-transform: uppercase;
+  padding: 0 8px;
+}
+.row-status.muted { opacity: 0.4; }
+
+/* ── REORDER MODE ─────────────────────────────────────────────────── */
+.reorder-ctrls { display: flex; gap: 3px; }
+.rc-btn {
+  width: 30px; height: 30px;
+  border: 1px solid var(--line);
+  background: rgba(0,245,255,0.05);
+  color: var(--cy-cyan);
+  font-family: 'JetBrains Mono', monospace;
+  font-weight: 700; font-size: 14px;
+  cursor: pointer;
+  clip-path: polygon(3px 0, 100% 0, 100% calc(100% - 3px), calc(100% - 3px) 100%, 0 100%, 0 3px);
+  display: inline-flex; align-items: center; justify-content: center;
+}
+.rc-btn:active { background: rgba(0,245,255,0.2); }
+.rc-btn.warn { color: var(--cy-pink); border-color: var(--line-hot); }
+
+/* ── NAME MODAL ───────────────────────────────────────────────────── */
+.name-modal {
+  max-width: 440px;
+  width: 100%;
+}
+.name-input {
+  width: 100%;
+  background: rgba(0,0,0,0.5);
+  border: 1px solid var(--cy-cyan);
+  color: var(--ink);
+  padding: 12px 14px;
+  font-family: 'Chakra Petch', sans-serif;
+  font-weight: 600;
+  font-size: 17px;
+  outline: none;
+  letter-spacing: 0.02em;
+  clip-path: polygon(5px 0, 100% 0, 100% calc(100% - 5px), calc(100% - 5px) 100%, 0 100%, 0 5px);
+}
+.name-input:focus {
+  border-color: var(--cy-pink);
+  box-shadow: 0 0 10px rgba(255,42,109,0.4);
+}
+.name-input::placeholder {
+  color: var(--dim);
+  font-weight: 400;
+  font-style: italic;
+}
+.name-actions {
+  display: flex; gap: 6px;
+  flex-wrap: wrap;
+}
+.name-btn {
+  flex: 1;
+  min-width: 140px;
+  padding: 10px 12px;
+  font-family: 'JetBrains Mono', monospace;
+  font-weight: 700;
+  font-size: 11px;
+  letter-spacing: 0.15em;
+  border: none;
+  cursor: pointer;
+  display: inline-flex; align-items: center; justify-content: center;
+  gap: 6px;
+  clip-path: polygon(5px 0, 100% 0, 100% calc(100% - 5px), calc(100% - 5px) 100%, 0 100%, 0 5px);
+}
+.name-btn.create {
+  background: var(--cy-pink);
+  color: #fff;
+  box-shadow: 0 0 10px rgba(255,42,109,0.4);
+}
+.name-btn.create:active { background: #fff; color: var(--cy-pink); }
+.name-btn.rename {
+  background: var(--cy-yellow);
+  color: var(--bg);
+}
+.name-btn.rename:active { background: #fff; }
+.name-btn.rename-reset {
+  background: transparent;
+  color: var(--cy-pink);
+  border: 1px solid var(--cy-pink);
+}
+.name-btn.rename-reset:active { background: rgba(255,42,109,0.15); }
+
+.name-divider {
+  display: flex; align-items: center; gap: 8px;
+  margin-top: 8px;
+}
+.name-divider::before, .name-divider::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: var(--line);
+}
+.name-divider span {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 9px;
+  color: var(--cy-cyan);
+  letter-spacing: 0.2em;
+  opacity: 0.7;
+}
+
+.name-list {
+  display: flex; flex-direction: column;
+  gap: 2px;
+  max-height: 260px;
+  overflow-y: auto;
+  border: 1px solid var(--line);
+  background: rgba(0,0,0,0.3);
+  clip-path: polygon(4px 0, 100% 0, 100% calc(100% - 4px), calc(100% - 4px) 100%, 0 100%, 0 4px);
+}
+.name-item {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 10px 12px;
+  background: transparent;
+  border: none;
+  border-bottom: 1px solid rgba(0,245,255,0.08);
+  color: var(--ink);
+  font-family: 'Chakra Petch', sans-serif;
+  font-size: 14px;
+  cursor: pointer;
+  text-align: left;
+  width: 100%;
+}
+.name-item:active { background: rgba(0,245,255,0.12); }
+.name-item:last-child { border-bottom: none; }
+.name-item-seated {
+  opacity: 0.3;
+  cursor: not-allowed;
+  pointer-events: none;
+}
+.ni-name { font-weight: 600; }
+.ni-seated {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 8px;
+  font-weight: 700;
+  color: var(--cy-yellow);
+  letter-spacing: 0.1em;
+  padding: 1px 4px;
+  border: 1px solid rgba(255,216,74,0.3);
+}
+.ni-meta {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 9px;
+  color: var(--dim);
+  letter-spacing: 0.12em;
+}
+.name-empty {
+  padding: 20px;
+  text-align: center;
+  color: var(--dim);
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px;
+  letter-spacing: 0.05em;
+  font-style: italic;
+}
+
+/* ── STATS TABLE ──────────────────────────────────────────────────── */
+.stats { margin-top: 16px; }
+.stats-head {
+  display: flex; align-items: center; justify-content: space-between;
+  margin-bottom: 6px; padding: 0 4px;
+}
+.stats-head h2 {
+  font-family: 'JetBrains Mono', monospace;
+  font-weight: 700; font-size: 13px;
+  letter-spacing: 0.2em; margin: 0;
+  color: var(--cy-cyan);
+  text-shadow: 0 0 6px rgba(0,245,255,0.3);
+}
+.stats-toggle {
+  display: flex; gap: 0;
+  border: 1px solid var(--line);
+  clip-path: polygon(4px 0, 100% 0, 100% calc(100% - 4px), calc(100% - 4px) 100%, 0 100%, 0 4px);
+}
+.tog {
+  padding: 4px 10px;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 9px; font-weight: 700;
+  letter-spacing: 0.15em;
+  background: transparent;
+  border: none;
+  color: var(--dim);
+  cursor: pointer;
+}
+.tog.on {
+  background: var(--cy-cyan);
+  color: var(--bg);
+}
+.stats-scroll {
+  border: 1px solid var(--line);
+  overflow-x: auto;
+  background: rgba(0,245,255,0.02);
+  clip-path: polygon(8px 0, 100% 0, 100% calc(100% - 8px), calc(100% - 8px) 100%, 0 100%, 0 8px);
+}
+.stats-grid {
+  display: grid;
+  min-width: 100%;
+}
+.sh, .sc {
+  padding: 5px 4px;
+  border-bottom: 1px solid rgba(0,245,255,0.08);
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 9px;
+}
+.sh {
+  background: rgba(0,245,255,0.07);
+  color: var(--cy-cyan);
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  font-size: 8px; font-weight: 700;
+  border-bottom: 1px solid var(--cy-cyan);
+  text-align: center;
+  white-space: nowrap;
+}
+.sh:first-child { text-align: left; }
+.sc {
+  display: flex; flex-direction: column; gap: 1px;
+  align-items: center; justify-content: center;
+}
+.sc.name {
+  font-family: 'Chakra Petch', sans-serif;
+  font-weight: 600; font-size: 11px;
+  align-items: flex-start; color: var(--ink);
+  overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+}
+.sc.hero-row {
+  color: var(--cy-cyan); font-weight: 700;
+  text-shadow: 0 0 6px rgba(0,245,255,0.4);
+}
+.sc.random-row {
+  color: var(--dim);
+  font-style: italic;
+  font-weight: 500;
+}
+.sc.dim { color: var(--dim); }
+.sc.mono { font-family: 'JetBrains Mono', monospace; }
+.sc-val { font-size: 12px; font-weight: 700; line-height: 1; }
+.sc-frac { color: var(--dim); font-size: 7px; line-height: 1; opacity: 0.7; }
+
+/* Stat cell clickable */
+.sc-clickable {
+  cursor: pointer;
+}
+.sc-clickable:active { background: rgba(0,245,255,0.1); }
+.sc-active {
+  background: rgba(255,42,109,0.12) !important;
+  border: 1px solid var(--cy-pink);
+}
+
+/* Drill row (inline position breakdown) */
+.drill-row {
+  background: rgba(0,245,255,0.03);
+  border-top: 1px solid var(--cy-pink);
+  border-bottom: 1px solid var(--cy-pink);
+  padding: 8px;
+}
+.drill-row-head {
+  display: flex; justify-content: space-between; align-items: center;
+  margin-bottom: 6px;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 9px; font-weight: 700;
+  color: var(--cy-cyan);
+  letter-spacing: 0.1em;
+}
+.drill-close {
+  background: transparent; border: none;
+  color: var(--dim); cursor: pointer;
+}
+.drill-row-cols {
+  display: flex; flex-wrap: wrap; gap: 4px;
+}
+.drill-na {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 9px; color: var(--dim);
+  font-style: italic;
+}
+.drill-col {
+  display: flex; flex-direction: column; align-items: center;
+  min-width: 36px;
+  padding: 4px 5px;
+  background: rgba(0,245,255,0.05);
+  border: 1px solid var(--faint);
+  clip-path: polygon(2px 0, 100% 0, 100% calc(100% - 2px), calc(100% - 2px) 100%, 0 100%, 0 2px);
+}
+.drill-col-pos {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 7px; font-weight: 700;
+  color: var(--cy-cyan);
+  letter-spacing: 0.08em;
+}
+.drill-col-val {
+  font-family: 'Chakra Petch', sans-serif;
+  font-size: 14px; font-weight: 700;
+  line-height: 1.1;
+}
+.drill-col-frac {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 7px; color: var(--dim);
+  opacity: 0.6;
+}
+.drill-col-sd { cursor: pointer; }
+.drill-col-sd:active { background: rgba(255,216,74,0.15); }
+.drill-sd-badge {
+  font-size: 8px;
+  color: var(--cy-yellow);
+  margin-top: 1px;
+}
+.drill-sd-list {
+  display: flex; flex-direction: column; gap: 2px;
+  margin-top: 3px;
+  padding-top: 3px;
+  border-top: 1px solid var(--faint);
+}
+.drill-sd-hand {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 9px; font-weight: 700;
+  color: var(--cy-yellow);
+  letter-spacing: 0.05em;
+}
+
+.stats-footer {
+  display: flex; gap: 12px; justify-content: flex-end;
+  margin-top: 6px; padding: 0 4px;
+}
+.reset-link {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 9px;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  background: transparent;
+  border: none;
+  color: var(--dim);
+  cursor: pointer;
+  text-decoration: underline;
+  text-decoration-color: var(--faint);
+}
+.reset-link.danger { color: var(--cy-pink); text-decoration-color: var(--line-hot); }
+
+/* ── MODALS ───────────────────────────────────────────────────────── */
+.modal-bg {
+  position: fixed; inset: 0;
+  background: rgba(5,6,10,0.85);
+  backdrop-filter: blur(4px);
+  display: flex; align-items: center; justify-content: center;
+  z-index: 200;
+  padding: 16px;
+  overscroll-behavior: contain;
+  overflow: hidden;
+  touch-action: none;
+}
+.modal {
+  background: var(--bg-2);
+  border: 1px solid var(--cy-cyan);
+  box-shadow: 0 0 30px rgba(0,245,255,0.4);
+  clip-path: polygon(10px 0, 100% 0, 100% calc(100% - 10px), calc(100% - 10px) 100%, 0 100%, 0 10px);
+  width: 100%;
+  max-width: 420px;
+  max-height: 90vh;
+  display: flex; flex-direction: column;
+}
+.modal-head {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 12px 16px;
+  border-bottom: 1px solid var(--line);
+}
+.modal-head h3 {
+  margin: 0;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 13px; letter-spacing: 0.2em;
+  color: var(--cy-cyan);
+}
+.modal-close {
+  background: transparent;
+  border: 1px solid var(--line);
+  color: var(--ink-soft);
+  cursor: pointer;
+  width: 24px; height: 24px;
+  display: inline-flex; align-items: center; justify-content: center;
+}
+.modal-body {
+  padding: 16px;
+  overflow-y: auto;
+  display: flex; flex-direction: column; gap: 10px;
+}
+.modal-foot {
+  display: flex; gap: 8px; justify-content: flex-end;
+  padding: 12px 16px;
+  border-top: 1px solid var(--line);
+}
+.opt-row {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 6px 0;
+  font-family: 'Chakra Petch', sans-serif;
+  font-size: 14px;
+  color: var(--ink);
+}
+.opt-row input[type="checkbox"] {
+  width: 18px; height: 18px;
+  accent-color: var(--cy-cyan);
+}
+.opt-hint {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px;
+  color: var(--dim);
+  letter-spacing: 0.05em;
+  margin: 4px 0 0;
+}
+.sd-row {
+  display: flex; align-items: center; gap: 8px;
+  padding: 6px 0;
+  border-bottom: 1px solid var(--line);
+}
+.sd-row.sd-active {
+  border-color: var(--cy-cyan);
+  background: rgba(0,245,255,0.05);
+}
+.sd-name {
+  display: flex; flex-direction: column; gap: 2px;
+  flex-shrink: 0;
+  width: 90px;
+}
+.sd-pos {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 9px;
+  color: var(--cy-cyan);
+  letter-spacing: 0.1em;
+}
+.sd-name span:last-child {
+  font-family: 'Chakra Petch', sans-serif;
+  font-size: 13px;
+  font-weight: 600;
+  overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+}
+.sd-cards {
+  display: flex; align-items: center; gap: 6px; flex: 1;
+}
+.sd-card-badge {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 14px; font-weight: 700;
+  background: rgba(0,245,255,0.1);
+  border: 1px solid var(--line);
+  padding: 4px 6px;
+  cursor: pointer;
+}
+.sd-card-badge:active { opacity: 0.5; }
+.sd-pick-btn {
+  width: 28px; height: 28px;
+  background: rgba(0,245,255,0.08);
+  border: 1px dashed var(--cy-cyan);
+  color: var(--cy-cyan);
+  font-size: 16px; font-weight: 700;
+  cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+}
+.sd-pick-btn:active { background: rgba(0,245,255,0.2); }
+
+/* Card picker grid */
+.card-picker {
+  margin-top: 12px;
+  display: flex; flex-direction: column; gap: 3px;
+  padding: 8px;
+  background: rgba(5,6,10,0.8);
+  border: 1px solid var(--line);
+}
+.cp-suit-row {
+  display: flex; gap: 2px; justify-content: center;
+}
+.cp-card {
+  width: 26px; height: 34px;
+  display: flex; flex-direction: column;
+  align-items: center; justify-content: center;
+  background: rgba(20,25,40,0.9);
+  border: 1px solid var(--faint);
+  font-family: 'JetBrains Mono', monospace;
+  cursor: pointer;
+  padding: 0;
+  gap: 0;
+}
+.cp-card:active { background: rgba(0,245,255,0.15); }
+.cp-rank { font-size: 10px; font-weight: 700; line-height: 1; }
+.cp-suit { font-size: 10px; line-height: 1; }
+.cp-card.selected {
+  background: rgba(0,245,255,0.25);
+  border-color: var(--cy-cyan);
+  box-shadow: 0 0 8px rgba(0,245,255,0.4);
+}
+.cp-card.used {
+  opacity: 0.15;
+  cursor: not-allowed;
+}
+.modal-wide { max-width: 420px; }
+.modal-back {
+  background: transparent; border: none;
+  color: var(--cy-cyan);
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px; font-weight: 700;
+  cursor: pointer; padding: 4px 8px;
+  letter-spacing: 0.1em;
+}
+.modal-back:active { color: var(--ink); }
+
+/* Session History */
+.sh-row {
+  display: flex; align-items: center; gap: 10px;
+  padding: 8px 0;
+  border-bottom: 1px solid var(--line);
+}
+.sh-id {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px; font-weight: 700;
+  color: var(--cy-cyan);
+  min-width: 32px;
+}
+.sh-details {
+  display: flex; flex-direction: column; gap: 2px; flex: 1;
+}
+.sh-room {
+  font-family: 'Chakra Petch', sans-serif;
+  font-size: 12px; font-weight: 600; color: var(--ink);
+}
+.sh-blind {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px; color: var(--dim);
+}
+.sh-meta {
+  display: flex; flex-direction: column; align-items: flex-end; gap: 2px;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 9px; color: var(--dim);
+}
+.sh-date { color: var(--faint); }
+
+/* Player Observer */
+.po-player-btn {
+  display: flex; align-items: center; gap: 8px;
+  width: 100%; padding: 10px 4px;
+  background: transparent; border: none;
+  border-bottom: 1px solid var(--line);
+  cursor: pointer; text-align: left;
+  color: var(--ink);
+}
+.po-player-btn:active { background: rgba(0,245,255,0.05); }
+.po-name {
+  font-family: 'Chakra Petch', sans-serif;
+  font-size: 14px; font-weight: 600;
+  flex: 1;
+}
+.po-room {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 9px; color: var(--dim);
+}
+.po-hands {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px; color: var(--cy-cyan);
+}
+.po-toggle {
+  display: flex; gap: 4px; margin-bottom: 10px;
+}
+.po-meta {
+  display: flex; gap: 16px; margin-bottom: 12px;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px; color: var(--dim);
+}
+.po-stats-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 6px;
+}
+.po-stat {
+  display: flex; flex-direction: column;
+  padding: 6px 8px;
+  background: rgba(0,245,255,0.04);
+  border: 1px solid var(--line);
+  clip-path: polygon(4px 0, 100% 0, 100% calc(100% - 4px), calc(100% - 4px) 100%, 0 100%, 0 4px);
+}
+.po-stat-label {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 8px; font-weight: 700;
+  color: var(--cy-cyan);
+  letter-spacing: 0.15em;
+  opacity: 0.7;
+}
+.po-stat-val {
+  font-family: 'Chakra Petch', sans-serif;
+  font-size: 18px; font-weight: 700;
+  line-height: 1.1;
+}
+.po-stat-frac {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 8px; color: var(--dim);
+  opacity: 0.6;
+}
+
+/* ── SETTINGS ────────────────────────────────────────────────────── */
+.settings-section {
+  margin-bottom: 16px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid var(--line);
+}
+.settings-section:last-child { border-bottom: none; margin-bottom: 0; }
+.ss-label {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 9px; font-weight: 700;
+  letter-spacing: 0.2em;
+  color: var(--cy-cyan);
+  display: block; margin-bottom: 8px;
+}
+.ss-chips {
+  display: flex; flex-wrap: wrap; gap: 5px; margin-bottom: 8px;
+}
+.ss-chip {
+  padding: 5px 10px;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px; font-weight: 700;
+  letter-spacing: 0.1em;
+  border: 1px solid var(--line);
+  background: rgba(0,245,255,0.04);
+  color: var(--dim);
+  cursor: pointer;
+  clip-path: polygon(3px 0, 100% 0, 100% calc(100% - 3px), calc(100% - 3px) 100%, 0 100%, 0 3px);
+}
+.ss-chip.on {
+  background: var(--cy-cyan);
+  color: var(--bg);
+  border-color: var(--cy-cyan);
+}
+.ss-chip:active { opacity: 0.7; }
+.ss-add-row {
+  display: flex; gap: 4px;
+}
+.ss-input {
+  flex: 1;
+  background: rgba(0,245,255,0.05);
+  border: 1px solid var(--line);
+  color: var(--ink);
+  padding: 5px 8px;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px;
+  outline: none;
+}
+.ss-input:focus { border-color: var(--cy-cyan); }
+.ss-input-sm { max-width: 100px; }
+.ss-add-btn {
+  padding: 5px 8px;
+  background: rgba(0,245,255,0.08);
+  border: 1px solid var(--line);
+  color: var(--cy-cyan);
+  cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+}
+.ss-add-btn:active { background: rgba(0,245,255,0.2); }
+.ss-select {
+  background: var(--bg-2);
+  border: 1px solid var(--line);
+  color: var(--ink);
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px;
+  padding: 4px 6px;
+  outline: none;
+}
+.ss-player-list {
+  display: flex; flex-direction: column; gap: 4px;
+  max-height: 200px; overflow-y: auto;
+}
+.ss-player-row {
+  display: flex; align-items: center; gap: 6px;
+  padding: 4px 0;
+  border-bottom: 1px solid var(--faint);
+}
+.ss-pname {
+  flex: 1;
+  font-family: 'Chakra Petch', sans-serif;
+  font-size: 13px; font-weight: 600;
+  color: var(--ink);
+  overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+}
+.ss-proom {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 9px;
+  color: var(--dim);
+  letter-spacing: 0.1em;
+}
+.ss-edit-btn, .ss-del-btn {
+  background: transparent;
+  border: none;
+  color: var(--dim);
+  cursor: pointer;
+  padding: 3px 4px;
+  font-size: 12px;
+}
+.ss-edit-btn:active, .ss-del-btn:active { color: var(--cy-cyan); }
+.ss-del-btn { color: var(--cy-pink); }
+.ss-del-btn:active { color: #ff6090; }
+`;
+
+const root = ReactDOM.createRoot(document.getElementById("root"));
+root.render(React.createElement(App));
+</script>
+<script>
+if ("serviceWorker" in navigator) {
+  navigator.serviceWorker.register("sw.js").then(reg => {
+    reg.update();
+    if (reg.waiting) reg.waiting.postMessage({ type: "SKIP_WAITING" });
+    reg.addEventListener("updatefound", () => {
+      const sw = reg.installing;
+      if (!sw) return;
+      sw.addEventListener("statechange", () => {
+        if (sw.state === "installed" && navigator.serviceWorker.controller) {
+          window.location.reload();
+        }
+      });
+    });
+  }).catch(() => {});
+  let refreshing = false;
+  navigator.serviceWorker.addEventListener("controllerchange", () => {
+    if (refreshing) return;
+    refreshing = true;
+    window.location.reload();
+  });
+}
+</script>
+</body>
+</html>
